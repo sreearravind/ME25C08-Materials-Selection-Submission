@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AI-assisted materials selection report submission portal">
+  <meta name="theme-color" content="#10263f">
+  <title>Materials Selection · AI-Assisted Submission</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2310263f'/%3E%3Cpath d='M8 23V9h4l4 7 4-7h4v14h-4v-7l-4 6-4-6v7z' fill='%23f2a65a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="config.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark" aria-hidden="true">M</div>
+    <div>
+      <p class="eyebrow" id="courseCode">ME25C08</p>
+      <h1>Materials Selection Submission</h1>
+    </div>
+    <span class="course-chip">AI-assisted activity</span>
+  </header>
+
+  <main>
+    <aside class="brief" aria-labelledby="briefTitle">
+      <div class="brief-card">
+        <p class="section-number">MODULE ACTIVITY</p>
+        <h2 id="briefTitle">Select. Verify. Defend.</h2>
+        <p>Use an AI model to investigate materials for your assigned engineering application. Your final recommendation must reflect your own engineering judgement.</p>
+
+        <ol class="process-list">
+          <li><span>01</span><div><strong>Define</strong><small>Application and service conditions</small></div></li>
+          <li><span>02</span><div><strong>Investigate</strong><small>Prompt an AI model and compare candidates</small></div></li>
+          <li><span>03</span><div><strong>Verify</strong><small>Check technical claims using reliable sources</small></div></li>
+          <li><span>04</span><div><strong>Reflect</strong><small>Explain corrections and key learning</small></div></li>
+        </ol>
+
+        <div class="limits">
+          <div><strong>3 MB</strong><span>Maximum PDF size</span></div>
+          <div><strong>1</strong><span>PDF or direct-text report</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="form-panel" aria-labelledby="formTitle">
+      <div id="setupNotice" class="notice warning" hidden>
+        Faculty setup is incomplete. Add the deployed Apps Script URL in <code>config.js</code> before sharing this page.
+      </div>
+
+      <div class="form-heading">
+        <p class="section-number">STUDENT SUBMISSION</p>
+        <h2 id="formTitle">Technical report and AI-use record</h2>
+        <p>Fields marked <span aria-hidden="true">*</span><span class="sr-only">with an asterisk</span> are required.</p>
+      </div>
+
+      <form id="submissionForm" novalidate>
+        <fieldset>
+          <legend><span>1</span> Student details</legend>
+          <div class="grid two">
+            <label>Full name <b>*</b>
+              <input name="studentName" autocomplete="name" maxlength="100" required placeholder="Enter your full name">
+            </label>
+            <label>Registration number <b>*</b>
+              <input name="registrationNumber" autocomplete="off" maxlength="30" required pattern="[A-Za-z0-9._/-]{3,30}" placeholder="e.g., 25ME001">
+            </label>
+          </div>
+          <label>Assigned engineering application <b>*</b>
+            <input name="application" maxlength="180" required placeholder="e.g., Material for an automotive connecting rod">
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>2</span> AI interaction</legend>
+          <div class="grid two">
+            <label>AI model used <b>*</b>
+              <select name="aiModel" id="aiModel" required>
+                <option value="">Select a model</option>
+                <option>ChatGPT</option>
+                <option>Gemini</option>
+                <option>Claude</option>
+                <option>Microsoft Copilot</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+            <label id="otherModelWrap" hidden>Other model name <b>*</b>
+              <input name="otherModel" id="otherModel" maxlength="80" placeholder="Enter model name">
+            </label>
+          </div>
+          <label>Prompt(s) used <b>*</b>
+            <textarea name="prompts" maxlength="12000" required rows="7" placeholder="Paste your initial prompt and important follow-up prompts. Label them Prompt 1, Prompt 2, etc."></textarea>
+            <span class="hint">Include the prompts that materially influenced your report.</span>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>3</span> Technical report</legend>
+          <div class="segmented" role="radiogroup" aria-label="Report submission method">
+            <label><input type="radio" name="reportMode" value="pdf" checked><span>Upload PDF</span></label>
+            <label><input type="radio" name="reportMode" value="text"><span>Enter report text</span></label>
+          </div>
+
+          <div id="pdfSection">
+            <label class="dropzone" id="dropzone">
+              <input type="file" name="reportPdf" id="reportPdf" accept="application/pdf,.pdf">
+              <span class="upload-icon" aria-hidden="true">PDF</span>
+              <strong id="fileLabel">Choose your report PDF</strong>
+              <small id="fileMeta">PDF only · maximum 3 MB</small>
+            </label>
+          </div>
+
+          <div id="textSection" hidden>
+            <label>Report text <b>*</b>
+              <textarea name="reportText" id="reportText" maxlength="25000" rows="14" placeholder="Paste your structured technical report here."></textarea>
+              <span class="hint"><span id="reportCount">0</span> / 25,000 characters</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>4</span> Verification and reflection</legend>
+          <label>Sources used to verify the AI output <b>*</b>
+            <textarea name="sources" maxlength="5000" required rows="4" placeholder="List at least two reliable sources: textbook, standard, material database, datasheet or journal article."></textarea>
+          </label>
+          <label>What did you correct, reject, or improve from the AI response? <b>*</b>
+            <textarea name="verification" maxlength="5000" required rows="4" placeholder="Identify at least one claim you checked. If no correction was needed, explain how you verified the major claims."></textarea>
+          </label>
+          <label>Personal interpretation and key learning <b>*</b>
+            <textarea name="reflection" maxlength="5000" required rows="5" placeholder="Explain your final material choice in your own words and state what you learned from the activity."></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset class="submission-check">
+          <legend><span>5</span> Submit</legend>
+          <label>Class submission code <b>*</b>
+            <input type="password" name="classCode" maxlength="50" required autocomplete="off" placeholder="Code provided by faculty">
+          </label>
+          <label class="check-row">
+            <input type="checkbox" name="declaration" value="yes" required>
+            <span>I confirm that I reviewed the AI-generated content, verified its important technical claims, and can explain the submitted work.</span>
+          </label>
+          <div id="formError" class="notice error" role="alert" hidden></div>
+          <button type="submit" id="submitButton">
+            <span class="button-text">Submit report</span>
+            <span class="button-wait" hidden>Preparing submission…</span>
+          </button>
+          <p class="privacy-note">Your PDF is sent directly to the faculty's Google Drive. Do not upload personal, confidential, or unpublished industrial data.</p>
+        </fieldset>
+      </form>
+
+      <section id="successPanel" class="success-panel" hidden tabindex="-1" aria-live="polite">
+        <div class="success-mark" aria-hidden="true">✓</div>
+        <p class="section-number">SUBMISSION RECEIVED</p>
+        <h2>Keep this receipt.</h2>
+        <p>Your report and AI-use record have been submitted.</p>
+        <dl>
+          <div><dt>Submission ID</dt><dd id="receiptId">—</dd></div>
+          <div><dt>Registration number</dt><dd id="receiptReg">—</dd></div>
+          <div><dt>Submitted at</dt><dd id="receiptTime">—</dd></div>
+        </dl>
+        <button type="button" class="secondary" id="newSubmission">Submit another response</button>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span id="institutionName">Department of Mechanical Engineering</span>
+    <span>Materials Selection · Responsible AI use</span>
+  </footer>
+
+  <iframe name="submissionTarget" id="submissionTarget" title="Submission response" hidden></iframe>
+</body>
+</html>
