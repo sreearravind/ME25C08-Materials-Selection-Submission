@@ -12,11 +12,234 @@
   const maxBytes = Number(config.maximumPdfBytes) || 3 * 1024 * 1024;
   let requestTimer = null;
 
+  const studentAssignments = [
+  {
+    "number": 1,
+    "roll": "25ME001",
+    "name": "Bharath R",
+    "application": "Select a material for an automotive engine crankshaft subjected to cyclic bending and torsion."
+  },
+  {
+    "number": 2,
+    "roll": "25ME002",
+    "name": "Darwin Cyril S",
+    "application": "Select a material for an automotive suspension coil spring requiring high fatigue resistance."
+  },
+  {
+    "number": 3,
+    "roll": "25ME003",
+    "name": "Devendhiran S",
+    "application": "Select a material for a railway wheel subjected to repeated rolling contact and impact loading."
+  },
+  {
+    "number": 4,
+    "roll": "25ME004",
+    "name": "Felix Josh Anson A",
+    "application": "Select a material for a food-processing mixer shaft requiring strength and corrosion resistance."
+  },
+  {
+    "number": 5,
+    "roll": "25ME005",
+    "name": "Gurusaran R",
+    "application": "Select a material for a hot-forging die exposed to impact, wear and elevated temperature."
+  },
+  {
+    "number": 6,
+    "roll": "25ME006",
+    "name": "Harish Maruthu R",
+    "application": "Select a material for an automobile engine block requiring vibration damping, castability and wear resistance."
+  },
+  {
+    "number": 7,
+    "roll": "25ME007",
+    "name": "Hewin Amala Inigo M",
+    "application": "Select a material for a heavy-duty manhole cover subjected to impact and traffic loading."
+  },
+  {
+    "number": 8,
+    "roll": "25ME008",
+    "name": "Idris A",
+    "application": "Select a lightweight material for commercial aircraft fuselage skin."
+  },
+  {
+    "number": 9,
+    "roll": "25ME010",
+    "name": "Koushik N",
+    "application": "Select a material for an electric-vehicle battery enclosure requiring low weight, crash resistance and heat dissipation."
+  },
+  {
+    "number": 10,
+    "roll": "25ME011",
+    "name": "Maheswaran A",
+    "application": "Select a material for a lightweight bicycle frame requiring strength, corrosion resistance and manufacturability."
+  },
+  {
+    "number": 11,
+    "roll": "25ME012",
+    "name": "Manikandan K",
+    "application": "Select a material for marine heat-exchanger tubes exposed to seawater corrosion."
+  },
+  {
+    "number": 12,
+    "roll": "25ME013",
+    "name": "Manivel S",
+    "application": "Select a material for a high-current electrical connector requiring conductivity, strength and thermal resistance."
+  },
+  {
+    "number": 13,
+    "roll": "25ME014",
+    "name": "Mathubalan T",
+    "application": "Select a lightweight material for the structural frame of a delivery drone."
+  },
+  {
+    "number": 14,
+    "roll": "25ME015",
+    "name": "Menaka S",
+    "application": "Select a material for a lightweight automobile gearbox housing requiring castability and vibration control."
+  },
+  {
+    "number": 15,
+    "roll": "25ME016",
+    "name": "Nasilan N",
+    "application": "Select a biocompatible material for a load-bearing hip implant stem."
+  },
+  {
+    "number": 16,
+    "roll": "25ME017",
+    "name": "Navin P",
+    "application": "Select a material for an aircraft compressor blade requiring high specific strength and fatigue resistance."
+  },
+  {
+    "number": 17,
+    "roll": "25ME018",
+    "name": "Nishanth S",
+    "application": "Select a material for a self-adjusting orthodontic archwire."
+  },
+  {
+    "number": 18,
+    "roll": "25ME019",
+    "name": "Nithish Kumar I",
+    "application": "Select a material for a temperature-activated automatic valve actuator."
+  },
+  {
+    "number": 19,
+    "roll": "25ME020",
+    "name": "Pratheesh Kumar B",
+    "application": "Select a material for a lightweight satellite structural panel requiring dimensional stability."
+  },
+  {
+    "number": 20,
+    "roll": "25ME021",
+    "name": "Sanjai L",
+    "application": "Select a material for a high-speed robotic arm requiring high stiffness and low inertia."
+  },
+  {
+    "number": 21,
+    "roll": "25ME022",
+    "name": "Sanjay K",
+    "application": "Select a material for a small wind-turbine blade exposed to cyclic loading and outdoor conditions."
+  },
+  {
+    "number": 22,
+    "roll": "25ME023",
+    "name": "Santhosh R",
+    "application": "Select a material for a chemical-storage tank requiring corrosion resistance and economical fabrication."
+  },
+  {
+    "number": 23,
+    "roll": "25ME024",
+    "name": "Santhosh S",
+    "application": "Select a material for a pump mechanical seal operating with abrasive and corrosive fluids."
+  },
+  {
+    "number": 24,
+    "roll": "25ME025",
+    "name": "Saravana D",
+    "application": "Select a material for a high-performance vehicle brake disc exposed to severe wear and temperature."
+  },
+  {
+    "number": 25,
+    "roll": "25ME026",
+    "name": "Sribhuvan B",
+    "application": "Select a material for high-speed bearing balls used in a machine-tool spindle."
+  },
+  {
+    "number": 26,
+    "roll": "25ME027",
+    "name": "Venkatesh P",
+    "application": "Select a material for a dental crown requiring strength, wear resistance and aesthetic appearance."
+  },
+  {
+    "number": 27,
+    "roll": "25ME028",
+    "name": "Vimalraj D",
+    "application": "Select a cutting-tool material for high-speed machining of nickel-based superalloys."
+  },
+  {
+    "number": 28,
+    "roll": "25ME029",
+    "name": "Vishal Kiptson S",
+    "application": "Select a polymer for an aircraft bearing cage requiring low weight, wear resistance and temperature stability."
+  },
+  {
+    "number": 29,
+    "roll": "25ME030",
+    "name": "Yogeshwara S",
+    "application": "Select a transparent material for an industrial safety visor requiring impact resistance."
+  },
+  {
+    "number": 30,
+    "roll": "25ME031",
+    "name": "Vishal V",
+    "application": "Select a polymer for an automotive air-intake manifold exposed to heat, vibration and oil vapours."
+  },
+  {
+    "number": 31,
+    "roll": "26LME01",
+    "name": "Siva Prasath M",
+    "application": "Select a material for a chemical-processing valve seat requiring low friction and chemical resistance."
+  },
+  {
+    "number": 32,
+    "roll": "26LME02",
+    "name": "Suthesh M",
+    "application": "Select a material for an automobile lead-acid battery casing requiring chemical and impact resistance."
+  },
+  {
+    "number": 33,
+    "roll": "26LME03",
+    "name": "Vignesh S",
+    "application": "Select a material for an underground drinking-water pipeline requiring corrosion resistance and flexibility."
+  }
+];
+
   document.getElementById("courseCode").textContent = config.courseCode || "ME25C08";
   document.getElementById("institutionName").textContent = config.institutionName || "Department of Mechanical Engineering";
 
   const endpointReady = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(config.appsScriptUrl || "");
   setupNotice.hidden = endpointReady;
+
+  const studentSelector = document.getElementById("studentSelector");
+  const studentName = document.getElementById("studentName");
+  const registrationNumber = document.getElementById("registrationNumber");
+  const assignedApplication = document.getElementById("assignedApplication");
+
+  studentAssignments.forEach(function (student) {
+    const option = document.createElement("option");
+    option.value = student.roll;
+    option.textContent = student.number + ". " + student.name + " (" + student.roll + ")";
+    studentSelector.appendChild(option);
+  });
+
+  studentSelector.addEventListener("change", function () {
+    const selected = studentAssignments.find(function (student) {
+      return student.roll === studentSelector.value;
+    });
+    studentName.value = selected ? selected.name : "";
+    registrationNumber.value = selected ? selected.roll : "";
+    assignedApplication.value = selected ? selected.application : "";
+    clearError();
+  });
 
   document.getElementById("aiModel").addEventListener("change", function (event) {
     const isOther = event.target.value === "Other";
@@ -198,7 +421,7 @@
     successPanel.hidden = true;
     form.hidden = false;
     document.querySelector(".form-heading").hidden = false;
-    form.elements.studentName.focus();
+    studentSelector.focus();
   });
 
   const modelContext = document.modelContext;
@@ -211,7 +434,7 @@
         inputSchema: { type: "object", properties: {}, additionalProperties: false },
         annotations: { readOnlyHint: true, untrustedContentHint: false },
         execute: function () {
-          form.elements.studentName.focus();
+          studentSelector.focus();
           return { status: "ready", firstField: "studentName" };
         }
       });
