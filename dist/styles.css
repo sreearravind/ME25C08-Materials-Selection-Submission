@@ -129,6 +129,12 @@ input, select, textarea {
   transition: border-color .15s, box-shadow .15s, background .15s;
 }
 textarea { min-height: 112px; resize: vertical; line-height: 1.5; }
+input[readonly], textarea[readonly] {
+  color: #26394b;
+  background: #eef3f7;
+  border-color: #c7d3de;
+  cursor: default;
+}
 input:focus, select:focus, textarea:focus { background: white; border-color: var(--navy-2); box-shadow: 0 0 0 3px rgba(23, 58, 94, .12); }
 input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--danger); background: #fffafa; }
 .hint { display: block; margin-top: 6px; color: var(--muted); font-size: .78rem; font-weight: 450; }
