@@ -56,16 +56,22 @@
       <form id="submissionForm" novalidate>
         <fieldset>
           <legend><span>1</span> Student details</legend>
+          <label>Select your name <b>*</b>
+            <select id="studentSelector" required>
+              <option value="">Choose your name and roll number</option>
+            </select>
+            <span class="hint">Confirm your registration number and assigned application after selection.</span>
+          </label>
           <div class="grid two">
-            <label>Full name <b>*</b>
-              <input name="studentName" autocomplete="name" maxlength="100" required placeholder="Enter your full name">
+            <label>Full name
+              <input name="studentName" id="studentName" maxlength="100" required readonly>
             </label>
-            <label>Registration number <b>*</b>
-              <input name="registrationNumber" autocomplete="off" maxlength="30" required pattern="[A-Za-z0-9._/-]{3,30}" placeholder="e.g., 25ME001">
+            <label>Registration number
+              <input name="registrationNumber" id="registrationNumber" maxlength="30" required readonly>
             </label>
           </div>
-          <label>Assigned engineering application <b>*</b>
-            <input name="application" maxlength="180" required placeholder="e.g., Material for an automotive connecting rod">
+          <label>Assigned engineering application
+            <textarea name="application" id="assignedApplication" maxlength="180" required readonly rows="4" placeholder="Your assigned application will appear here."></textarea>
           </label>
         </fieldset>
 
