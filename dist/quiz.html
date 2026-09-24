@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10263f">
+  <meta name="description" content="ME25C08 Units III and IV MCQ self-assessment">
+  <title>ME25C08 · MCQ Test</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="quiz.css">
+  <script src="quiz.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark" aria-hidden="true">M</div>
+    <div><p class="eyebrow">ME25C08</p><h1>Units III & IV · MCQ Test</h1></div>
+    <a class="top-link" href="index.html">Submission portal</a>
+  </header>
+
+  <main class="quiz-main">
+    <section id="startPanel" class="quiz-shell start-panel">
+      <p class="section-number">AT-2 SELF-ASSESSMENT</p>
+      <h2>40 questions · one correct answer each</h2>
+      <p>Answer every question and submit once. Your score and the justified answer review will appear immediately after submission.</p>
+      <label>Select your name <b>*</b>
+        <select id="studentSelect" required><option value="">Choose your name and registration number</option></select>
+      </label>
+      <div class="test-rules">
+        <strong>Test-mode limitation</strong>
+        <p>This page can request fullscreen and note when the page becomes hidden, but a normal browser cannot securely stop app or tab switching. The focus count is informational, not proof of misconduct.</p>
+      </div>
+      <label class="check-row">
+        <input id="honourCheck" type="checkbox">
+        <span>I will attempt the questions independently before viewing the answer review.</span>
+      </label>
+      <button id="startButton" type="button">Start in fullscreen test mode</button>
+      <p id="startError" class="notice error" hidden></p>
+    </section>
+
+    <section id="testPanel" class="quiz-layout" hidden>
+      <aside class="quiz-status">
+        <p class="section-number">PROGRESS</p>
+        <div class="progress-copy"><strong id="answeredCount">0</strong><span>/ 40 answered</span></div>
+        <div class="progress-track"><span id="progressBar"></span></div>
+        <p class="focus-line">Page-hidden count: <strong id="focusCount">0</strong></p>
+        <div id="palette" class="question-palette" aria-label="Question navigation"></div>
+      </aside>
+      <section class="quiz-shell question-shell">
+        <div class="question-meta"><span id="unitLabel"></span><span id="questionNumber"></span></div>
+        <h2 id="questionText"></h2>
+        <div id="options" class="options"></div>
+        <div class="question-actions">
+          <button id="prevButton" class="secondary" type="button">Previous</button>
+          <button id="nextButton" type="button">Next</button>
+          <button id="submitButton" type="button" hidden>Submit test</button>
+        </div>
+        <p id="testError" class="notice error" hidden></p>
+      </section>
+    </section>
+
+    <section id="resultPanel" class="quiz-shell result-shell" hidden tabindex="-1">
+      <p class="section-number">TEST COMPLETED</p>
+      <div class="result-summary">
+        <div><h2 id="resultName"></h2><p id="resultMeta"></p></div>
+        <div class="score-ring"><strong id="scoreValue"></strong><span>/ 40</span></div>
+      </div>
+      <div class="score-stats">
+        <div><strong id="percentValue"></strong><span>Percentage</span></div>
+        <div><strong id="correctValue"></strong><span>Correct</span></div>
+        <div><strong id="incorrectValue"></strong><span>Incorrect</span></div>
+        <div><strong id="focusResult"></strong><span>Page hidden</span></div>
+      </div>
+      <p class="result-note">Review each answer below. The justification explains the governing materials-science concept.</p>
+      <div id="answerReview" class="answer-review"></div>
+      <div class="result-actions"><button id="printButton" type="button">Print / save result</button><button id="restartButton" class="secondary" type="button">Attempt again</button></div>
+    </section>
+  </main>
+  <footer><span>JJ College of Engineering and Technology</span><span>Department of Mechanical Engineering</span></footer>
+</body>
+</html>
