@@ -62,6 +62,8 @@ body {
   font-size: .8rem;
   white-space: nowrap;
 }
+.results-link { text-decoration: none; }
+.results-link:hover { color: var(--navy); background: white; }
 
 main { max-width: 1360px; margin: 0 auto; display: grid; grid-template-columns: minmax(280px, 370px) minmax(0, 1fr); }
 .brief { padding: 42px 0 42px 42px; }
