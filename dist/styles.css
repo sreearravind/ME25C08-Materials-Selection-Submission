@@ -62,7 +62,7 @@ body {
   font-size: .8rem;
   white-space: nowrap;
 }
-.results-link { text-decoration: none; }
+.top-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }\n.top-actions .course-chip { margin-left: 0; }\n.results-link { text-decoration: none; }
 .results-link:hover { color: var(--navy); background: white; }
 
 main { max-width: 1360px; margin: 0 auto; display: grid; grid-template-columns: minmax(280px, 370px) minmax(0, 1fr); }
