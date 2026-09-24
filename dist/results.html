@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Provisional rubric feedback for the ME25C08 AI-assisted materials selection activity">
+  <meta name="theme-color" content="#10263f">
+  <title>ME25C08 · Evaluation Results</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="results.css">
+  <script src="results.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark" aria-hidden="true">M</div>
+    <div><p class="eyebrow">ME25C08</p><h1>Materials Selection Evaluation</h1></div>
+    <a class="top-link" href="index.html">Submission portal</a>
+  </header>
+  <main class="results-main">
+    <aside class="results-nav" aria-label="Student results">
+      <p class="section-number">PROVISIONAL RESULTS</p>
+      <h2>Select your name</h2>
+      <p>Marks shown are for the written submission only.</p>
+      <label>Search by name or registration number
+        <input id="studentSearch" type="search" autocomplete="off" placeholder="Start typing…">
+      </label>
+      <div id="studentList" class="student-list"></div>
+      <p id="noMatch" hidden>No matching evaluated submission.</p>
+    </aside>
+    <section class="results-content" aria-live="polite">
+      <div id="emptyState" class="empty-state"><h2>Choose a student to view feedback</h2><p>Each result includes the rubric breakdown and two focused comments.</p></div>
+      <article id="resultPanel" class="result-panel" hidden></article>
+    </section>
+  </main>
+  <footer><span>Department of Mechanical Engineering</span><span>Latest submission evaluated · Oral defence pending</span></footer>
+</body>
+</html>
