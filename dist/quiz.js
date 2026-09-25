@@ -101,7 +101,7 @@
     if(!studentSelect.value||!$('#honourCheck').checked){ $('#startError').textContent='Select your name and confirm the independent-attempt statement.'; $('#startError').hidden=false; return; }
     $('#startError').hidden=true; await enterFullscreen();
     sessionId=(crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`);
-    active=true; startedAt=Date.now(); $('#startPanel').hidden=true; $('#testPanel').hidden=false; renderQuestion();
+    active=true; startedAt=Date.now(); document.body.classList.add('test-active'); $('#startPanel').hidden=true; $('#testPanel').hidden=false; renderQuestion();
     signal('start',document.fullscreenElement?'fullscreen-started':'fullscreen-unavailable-or-denied');startHeartbeat();
   });
   $('#options').addEventListener('change',e=>{ if(e.target.name==='answer'){answers[current]=Number(e.target.value);updateProgress();} });
@@ -110,7 +110,10 @@
   $('#nextButton').addEventListener('click',()=>{if(current<questions.length-1){current++;renderQuestion();}});
   document.addEventListener('visibilitychange',()=>{if(active&&!submitted&&document.hidden){focusCount++;$('#focusCount').textContent=focusCount;signal('page_hidden','Student page became hidden');}});
   document.addEventListener('fullscreenchange',()=>{if(active&&!submitted&&!document.fullscreenElement){fullscreenExits++;signal('fullscreen_exit','Student exited fullscreen mode');}});
+  document.addEventListener('selectstart',e=>{if(active&&!submitted&&e.target.closest('#testPanel'))e.preventDefault();});
   document.addEventListener('copy',e=>{if(active&&!submitted)e.preventDefault();});
+  document.addEventListener('cut',e=>{if(active&&!submitted)e.preventDefault();});
+  document.addEventListener('dragstart',e=>{if(active&&!submitted&&e.target.closest('#testPanel'))e.preventDefault();});
   document.addEventListener('contextmenu',e=>{if(active&&!submitted)e.preventDefault();});
   $('#submitButton').addEventListener('click',()=>{
     const missing=answers.map((x,i)=>x===null?i+1:null).filter(Boolean);
@@ -119,7 +122,7 @@
     finishTest();
   });
   function finishTest(){
-    submitted=true;active=false;clearInterval(heartbeatTimer);
+    submitted=true;active=false;document.body.classList.remove('test-active');clearInterval(heartbeatTimer);
     if(document.fullscreenElement&&document.exitFullscreen) document.exitFullscreen().catch(()=>{});
     const selected=students.find(x=>x[0]===studentSelect.value);
     const score=answers.filter((a,i)=>a===questions[i].answer).length;
