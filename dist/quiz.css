@@ -7,4 +7,4 @@
   user-select: none;
   -webkit-touch-callout: none;
 }
-.test-active #testPanel input { user-select: auto; }
+.test-active #testPanel input { user-select: none !important; }
