@@ -1,5 +1,7 @@
 (function(){
   'use strict';
+  const config=window.SITE_CONFIG||{};
+  const logEndpoint=config.appsScriptUrl||'';
   const students=[
     ['25ME001','Bharath R'],['25ME002','Darwin Cyril S'],['25ME003','Devendhiran S'],['25ME004','Felix Josh Anson A'],['25ME005','Gurusaran R'],['25ME006','Harish Maruthu R'],['25ME007','Hewin Amala Inigo M'],['25ME008','Idris A'],['25ME010','Koushik N'],['25ME011','Maheswaran A'],['25ME012','Manikandan K'],['25ME013','Manivel S'],['25ME014','Mathubalan T'],['25ME015','Menaka S'],['25ME016','Nasilan N'],['25ME017','Navin P'],['25ME018','Nishanth S'],['25ME019','Nithish Kumar I'],['25ME020','Pratheesh Kumar B'],['25ME021','Sanjai L'],['25ME022','Sanjay K'],['25ME023','Santhosh R'],['25ME024','Santhosh S'],['25ME025','Saravana D'],['25ME026','Sribhuvan B'],['25ME027','Venkatesh P'],['25ME028','Vimalraj D'],['25ME029','Vishal Kiptson S'],['25ME030','Yogeshwara S'],['25ME031','Vishal V'],['26LME01','Siva Prasath M'],['26LME02','Suthesh M'],['26LME03','Vignesh S']
   ];
@@ -51,7 +53,25 @@
   const studentSelect=$('#studentSelect');
   students.forEach(([roll,name],i)=>studentSelect.add(new Option(`${i+1}. ${name} (${roll})`,roll)));
   const answers=Array(questions.length).fill(null);
-  let current=0,focusCount=0,active=false,submitted=false,startedAt=null;
+  let current=0,focusCount=0,fullscreenExits=0,active=false,submitted=false,startedAt=null,sessionId='',heartbeatTimer=null;
+
+  function selectedStudent(){ return students.find(x=>x[0]===studentSelect.value)||['','']; }
+  function signal(eventType,detail,extra){
+    if(!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(logEndpoint)||!sessionId)return;
+    const student=selectedStudent();
+    const body=new URLSearchParams(Object.assign({
+      action:'quizEvent',eventType,detail:detail||'',sessionId,
+      registrationNumber:student[0],studentName:student[1],
+      currentQuestion:String(current+1),answered:String(answers.filter(x=>x!==null).length),
+      pageHidden:String(focusCount),fullscreenExits:String(fullscreenExits),
+      isFullscreen:String(Boolean(document.fullscreenElement)),clientTimestamp:new Date().toISOString()
+    },extra||{}));
+    fetch(logEndpoint,{method:'POST',mode:'no-cors',body,keepalive:true}).catch(()=>{});
+  }
+  function startHeartbeat(){
+    clearInterval(heartbeatTimer);
+    heartbeatTimer=setInterval(()=>{if(active&&!submitted)signal('heartbeat','');},30000);
+  }
 
   function renderPalette(){
     $('#palette').innerHTML=questions.map((_,i)=>`<button type="button" data-index="${i}" class="${answers[i]!==null?'answered ':''}${i===current?'current':''}">${i+1}</button>`).join('');
@@ -79,13 +99,17 @@
   }
   $('#startButton').addEventListener('click',async()=>{
     if(!studentSelect.value||!$('#honourCheck').checked){ $('#startError').textContent='Select your name and confirm the independent-attempt statement.'; $('#startError').hidden=false; return; }
-    $('#startError').hidden=true; await enterFullscreen(); active=true; startedAt=Date.now(); $('#startPanel').hidden=true; $('#testPanel').hidden=false; renderQuestion();
+    $('#startError').hidden=true; await enterFullscreen();
+    sessionId=(crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    active=true; startedAt=Date.now(); $('#startPanel').hidden=true; $('#testPanel').hidden=false; renderQuestion();
+    signal('start',document.fullscreenElement?'fullscreen-started':'fullscreen-unavailable-or-denied');startHeartbeat();
   });
   $('#options').addEventListener('change',e=>{ if(e.target.name==='answer'){answers[current]=Number(e.target.value);updateProgress();} });
   $('#palette').addEventListener('click',e=>{const b=e.target.closest('button');if(b){current=Number(b.dataset.index);renderQuestion();}});
   $('#prevButton').addEventListener('click',()=>{if(current>0){current--;renderQuestion();}});
   $('#nextButton').addEventListener('click',()=>{if(current<questions.length-1){current++;renderQuestion();}});
-  document.addEventListener('visibilitychange',()=>{if(active&&!submitted&&document.hidden){focusCount++;$('#focusCount').textContent=focusCount;}});
+  document.addEventListener('visibilitychange',()=>{if(active&&!submitted&&document.hidden){focusCount++;$('#focusCount').textContent=focusCount;signal('page_hidden','Student page became hidden');}});
+  document.addEventListener('fullscreenchange',()=>{if(active&&!submitted&&!document.fullscreenElement){fullscreenExits++;signal('fullscreen_exit','Student exited fullscreen mode');}});
   document.addEventListener('copy',e=>{if(active&&!submitted)e.preventDefault();});
   document.addEventListener('contextmenu',e=>{if(active&&!submitted)e.preventDefault();});
   $('#submitButton').addEventListener('click',()=>{
@@ -95,11 +119,16 @@
     finishTest();
   });
   function finishTest(){
-    submitted=true;active=false;
+    submitted=true;active=false;clearInterval(heartbeatTimer);
     if(document.fullscreenElement&&document.exitFullscreen) document.exitFullscreen().catch(()=>{});
     const selected=students.find(x=>x[0]===studentSelect.value);
     const score=answers.filter((a,i)=>a===questions[i].answer).length;
     const elapsed=Math.max(1,Math.round((Date.now()-startedAt)/60000));
+    const durationSeconds=Math.max(1,Math.round((Date.now()-startedAt)/1000));
+    if(/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(logEndpoint)){
+      const body=new URLSearchParams({action:'quizResult',sessionId,registrationNumber:selected[0],studentName:selected[1],score:String(score),total:String(questions.length),durationSeconds:String(durationSeconds),pageHidden:String(focusCount),fullscreenExits:String(fullscreenExits),clientTimestamp:new Date().toISOString()});
+      fetch(logEndpoint,{method:'POST',mode:'no-cors',body,keepalive:true}).catch(()=>{});
+    }
     $('#testPanel').hidden=true;$('#resultPanel').hidden=false;
     $('#resultName').textContent=selected[1];
     $('#resultMeta').textContent=`${selected[0]} · Completed in ${elapsed} minute${elapsed===1?'':'s'}`;
