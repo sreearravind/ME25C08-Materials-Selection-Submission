@@ -10,8 +10,11 @@
 
 const INITIAL_CLASS_CODE = 'CHANGE-THIS-CLASS-CODE';
 const MAX_PDF_BYTES = 3 * 1024 * 1024;
+const MAX_PRESENTATION_BYTES = 10 * 1024 * 1024;
 const MAX_TEXT_CHARS = 25000;
 const SHEET_NAME = 'Submissions';
+const PRESENTATION_SHEET = 'Presentation Submissions';
+const PRESENTATION_FOLDER_PROPERTY = 'PRESENTATION_FOLDER_ID';
 const QUIZ_LIVE_SHEET = 'Quiz Live';
 const QUIZ_RESULTS_SHEET = 'Quiz Results';
 const QUIZ_EVENTS_SHEET = 'Quiz Events';
@@ -49,10 +52,12 @@ function setupProject() {
     props.setProperty('DRIVE_FOLDER_ID', folderId);
   }
 
+  const presentation = ensurePresentationResources_(spreadsheetId);
   props.setProperty('CLASS_CODE', INITIAL_CLASS_CODE);
   Logger.log('Spreadsheet: ' + SpreadsheetApp.openById(spreadsheetId).getUrl());
   Logger.log('PDF folder: ' + DriveApp.getFolderById(folderId).getUrl());
-  return { spreadsheetId: spreadsheetId, folderId: folderId };
+  Logger.log('Presentation folder: ' + DriveApp.getFolderById(presentation.folderId).getUrl());
+  return { spreadsheetId: spreadsheetId, folderId: folderId, presentationFolderId: presentation.folderId };
 }
 
 function doGet(e) {
@@ -71,6 +76,8 @@ function doPost(e) {
     } else if (p.action === 'quizResult') {
       saveQuizResult_(p);
       result = { ok: true };
+    } else if (p.action === 'presentationSubmission') {
+      result = savePresentationSubmission_(p);
     } else {
       result = saveSubmission_(p);
     }
@@ -287,6 +294,138 @@ function dateIso_(value) {
   return isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
 }
 
+
+function setupPresentationModule() {
+  const props = PropertiesService.getScriptProperties();
+  const spreadsheetId = props.getProperty('SPREADSHEET_ID');
+  if (!spreadsheetId) throw new Error('Run setupProject() first.');
+  const result = ensurePresentationResources_(spreadsheetId);
+  Logger.log('Presentation spreadsheet: ' + SpreadsheetApp.openById(spreadsheetId).getUrl());
+  Logger.log('Presentation folder: ' + DriveApp.getFolderById(result.folderId).getUrl());
+  return result;
+}
+
+function ensurePresentationResources_(spreadsheetId) {
+  const props = PropertiesService.getScriptProperties();
+  const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  ensureSheet_(spreadsheet, PRESENTATION_SHEET, [
+    'Server timestamp', 'Submission ID', 'Status', 'Team number', 'Assigned topic',
+    'Submitted by', 'Primary AI tool', 'How AI helped', 'Verified technical claim',
+    'Verification source', 'Presentation file name', 'File type', 'File size bytes',
+    'Drive URL', 'Client timestamp'
+  ]);
+
+  let folderId = props.getProperty(PRESENTATION_FOLDER_PROPERTY);
+  if (!folderId) {
+    const folder = DriveApp.createFolder('ME25C08 – Student Presentations');
+    folderId = folder.getId();
+    props.setProperty(PRESENTATION_FOLDER_PROPERTY, folderId);
+  }
+  return { spreadsheetId: spreadsheetId, folderId: folderId };
+}
+
+function savePresentationSubmission_(p) {
+  const props = PropertiesService.getScriptProperties();
+  const spreadsheetId = props.getProperty('SPREADSHEET_ID');
+  const expectedCode = props.getProperty('CLASS_CODE');
+  if (!spreadsheetId || !expectedCode) throw new Error('The faculty setup is incomplete.');
+  if (String(p.classCode || '') !== expectedCode) throw new Error('The class submission code is incorrect.');
+
+  const teamNumber = required_(p.teamNumber, 'Team number', 2);
+  if (!/^(0[1-9]|1[01])$/.test(teamNumber)) throw new Error('Choose a valid team number from 01 to 11.');
+  const topicTitle = required_(p.topicTitle, 'Assigned topic', 220);
+  const submitterName = required_(p.submitterName, 'Submitted by', 100);
+  const aiModel = required_(p.aiModel, 'Primary AI tool', 80);
+  const aiContribution = required_(p.aiContribution, 'AI contribution', 350);
+  const verifiedClaim = required_(p.verifiedClaim, 'Verified technical claim', 1000);
+  const verificationSource = required_(p.verificationSource, 'Verification source', 1000);
+  if (p.declaration !== 'yes') throw new Error('The team declaration must be accepted.');
+
+  const base64 = required_(p.presentationBase64, 'Presentation data', 15 * 1024 * 1024);
+  const bytes = Utilities.base64Decode(base64);
+  if (!bytes.length || bytes.length > MAX_PRESENTATION_BYTES) {
+    throw new Error('The presentation file must be between 1 byte and 10 MB.');
+  }
+
+  const original = cleanFileName_(p.presentationFileName || 'presentation.pdf');
+  const extension = original.toLowerCase().split('.').pop();
+  if (['pdf', 'ppt', 'pptx'].indexOf(extension) < 0) {
+    throw new Error('Only PDF, PPT and PPTX presentation files are accepted.');
+  }
+  if (!validPresentationSignature_(bytes, extension)) {
+    throw new Error('The uploaded presentation file does not match the selected file type.');
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const resources = ensurePresentationResources_(spreadsheetId);
+    const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+    const sheet = spreadsheet.getSheetByName(PRESENTATION_SHEET);
+    const previousCount = countPreviousPresentation_(sheet, teamNumber);
+    const status = previousCount ? 'Resubmission ' + (previousCount + 1) : 'First submission';
+    const submissionId = 'PRES-' + teamNumber + '-' + Utilities.getUuid().split('-')[0].toUpperCase();
+    const now = new Date();
+    const fileName = Utilities.formatDate(now, Session.getScriptTimeZone(), 'yyyyMMdd_HHmmss') +
+      '_Team_' + teamNumber + '_' + original;
+    const mimeType = presentationMimeType_(extension);
+    const teamFolder = getOrCreateSubfolder_(DriveApp.getFolderById(resources.folderId), 'Team_' + teamNumber);
+    const file = teamFolder.createFile(Utilities.newBlob(bytes, mimeType, fileName));
+
+    sheet.appendRow([
+      now, submissionId, status, sheetSafe_(teamNumber), sheetSafe_(topicTitle),
+      sheetSafe_(submitterName), sheetSafe_(aiModel), sheetSafe_(aiContribution),
+      sheetSafe_(verifiedClaim), sheetSafe_(verificationSource), sheetSafe_(fileName),
+      sheetSafe_(extension.toUpperCase()), bytes.length, file.getUrl(),
+      sheetSafe_(String(p.clientTimestamp || '').slice(0, 50))
+    ]);
+
+    return {
+      responseType: 'presentation-submission-result',
+      ok: true,
+      submissionId: submissionId,
+      teamNumber: teamNumber,
+      topicTitle: topicTitle,
+      submittedAt: Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd MMM yyyy, hh:mm a')
+    };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function countPreviousPresentation_(sheet, teamNumber) {
+  if (!sheet || sheet.getLastRow() < 2) return 0;
+  const values = sheet.getRange(2, 4, sheet.getLastRow() - 1, 1).getDisplayValues();
+  return values.reduce(function(count, row) {
+    return count + (String(row[0]) === String(teamNumber) ? 1 : 0);
+  }, 0);
+}
+
+function getOrCreateSubfolder_(rootFolder, name) {
+  const folders = rootFolder.getFoldersByName(name);
+  return folders.hasNext() ? folders.next() : rootFolder.createFolder(name);
+}
+
+function presentationMimeType_(extension) {
+  if (extension === 'pdf') return MimeType.PDF;
+  if (extension === 'ppt') return 'application/vnd.ms-powerpoint';
+  return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+}
+
+function validPresentationSignature_(bytes, extension) {
+  if (extension === 'pdf') {
+    return bytes.length >= 4 && bytes[0] === 37 && bytes[1] === 80 && bytes[2] === 68 && bytes[3] === 70;
+  }
+  if (extension === 'ppt') {
+    const signature = [208, 207, 17, 224, 161, 177, 26, 225];
+    return bytes.length >= 8 && signature.every(function(value, index) { return bytes[index] === value; });
+  }
+  return bytes.length >= 4 && bytes[0] === 80 && bytes[1] === 75 &&
+    (bytes[2] === 3 || bytes[2] === 5 || bytes[2] === 7) &&
+    (bytes[3] === 4 || bytes[3] === 6 || bytes[3] === 8);
+}
+
+
 function saveSubmission_(p) {
   const props = PropertiesService.getScriptProperties();
   const spreadsheetId = props.getProperty('SPREADSHEET_ID');
@@ -388,11 +527,13 @@ function safeErrorMessage_(error) {
 
 function responsePage_(result) {
   const json = JSON.stringify({
-    type: 'materials-submission-result',
+    type: result.responseType || 'materials-submission-result',
     ok: Boolean(result.ok),
     message: result.message || '',
     submissionId: result.submissionId || '',
     registrationNumber: result.registrationNumber || '',
+    teamNumber: result.teamNumber || '',
+    topicTitle: result.topicTitle || '',
     submittedAt: result.submittedAt || ''
   }).replace(/</g, '\\u003c');
   const html = '<!doctype html><html><body><script>' +

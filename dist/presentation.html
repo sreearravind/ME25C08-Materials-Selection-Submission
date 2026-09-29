@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ME25C08 student technical presentation module">
+  <meta name="theme-color" content="#10263f">
+  <title>Student Presentation | NE25C08 Course Hub</title>
+  <link rel="stylesheet" href="presentation.css">
+  <script src="config.js"></script>
+  <script src="presentation-data.js"></script>
+  <script src="presentation.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark" aria-hidden="true">P</div>
+    <div class="brand-copy">
+      <p class="eyebrow" id="courseCode">ME25C08</p>
+      <h1>Student Technical Presentation</h1>
+    </div>
+    <nav class="top-actions" aria-label="Course navigation">
+      <a href="index.html">Course Hub</a>
+      <a href="materials-selection.html">Materials Selection</a>
+      <a href="quiz.html">MCQ Test</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="intro">
+      <p class="section-number">GROUP PRESENTATION · 3 STUDENTS PER TEAM</p>
+      <h2>Research with AI. Verify the engineering. Present what you understand.</h2>
+      <p>Each team will prepare one technical presentation. Generative AI may support research, planning, slide drafting and rehearsal, but the team must verify important technical claims and defend the final presentation during oral questioning.</p>
+      <div class="rules">
+        <div><strong>11</strong><span>teams</span></div>
+        <div><strong>3</strong><span>students per team</span></div>
+        <div><strong>10 MB</strong><span>maximum file size</span></div>
+        <div><strong>PDF / PPT / PPTX</strong><span>accepted formats</span></div>
+      </div>
+    </section>
+
+    <section class="topic-section" aria-labelledby="topicHeading">
+      <div class="section-heading">
+        <p class="section-number">PRESENTATION TOPICS</p>
+        <h2 id="topicHeading">11 topics across the four course-file themes</h2>
+      </div>
+      <div id="topicList" class="topic-grid"></div>
+    </section>
+
+    <section class="submission-section" aria-labelledby="submissionHeading">
+      <div id="allocationNotice" class="notice info" hidden>
+        Team allocation is not yet published. The 11 topics are available for reference; presentation upload will open after the faculty shuffle is entered in <code>presentation-data.js</code>.
+      </div>
+      <div id="setupNotice" class="notice warning" hidden>
+        The presentation module is not connected to the deployed Apps Script backend yet.
+      </div>
+
+      <div class="section-heading">
+        <p class="section-number">TEAM SUBMISSION</p>
+        <h2 id="submissionHeading">Upload one final presentation per team</h2>
+        <p>Choose your team first. When allocations are published, your assigned topic and team members will appear automatically.</p>
+      </div>
+
+      <form id="presentationForm" novalidate>
+        <fieldset>
+          <legend><span>1</span> Team and assigned topic</legend>
+          <label>Team number <b>*</b>
+            <select id="teamNumber" name="teamNumber" required>
+              <option value="">Choose your team</option>
+            </select>
+          </label>
+          <div id="teamDetails" class="team-details" hidden>
+            <div>
+              <span class="mini-label">TEAM MEMBERS</span>
+              <p id="teamMembers">—</p>
+            </div>
+            <div>
+              <span class="mini-label">ASSIGNED TOPIC</span>
+              <p id="assignedTopic">—</p>
+            </div>
+          </div>
+          <input type="hidden" name="topicTitle" id="topicTitle">
+          <label>Submitted by (one team member) <b>*</b>
+            <input type="text" name="submitterName" maxlength="100" required placeholder="Enter the name of the student uploading the file">
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>2</span> AI-use and verification record</legend>
+          <div class="grid two">
+            <label>Primary AI tool used <b>*</b>
+              <select name="aiModel" required>
+                <option value="">Select</option>
+                <option>ChatGPT</option>
+                <option>Gemini</option>
+                <option>Claude</option>
+                <option>Microsoft Copilot</option>
+                <option>Other</option>
+                <option>No generative AI used</option>
+              </select>
+            </label>
+            <label>How did AI help your team? <b>*</b>
+              <input type="text" name="aiContribution" maxlength="350" required placeholder="Research, structure, comparison, slide drafting, rehearsal...">
+            </label>
+          </div>
+          <label>One important technical claim your team independently verified <b>*</b>
+            <textarea name="verifiedClaim" maxlength="1000" rows="4" required placeholder="State the claim and briefly explain what you checked."></textarea>
+          </label>
+          <label>Verification source <b>*</b>
+            <textarea name="verificationSource" maxlength="1000" rows="3" required placeholder="Textbook, standard, datasheet, journal article or other reliable technical source."></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>3</span> Presentation file</legend>
+          <label class="dropzone" id="presentationDropzone">
+            <input type="file" id="presentationFile" accept=".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" required>
+            <span class="upload-icon" aria-hidden="true">FILE</span>
+            <strong id="fileLabel">Choose the final presentation</strong>
+            <small id="fileMeta">PDF, PPT or PPTX · maximum 10 MB</small>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend><span>4</span> Submit</legend>
+          <label>Class submission code <b>*</b>
+            <input type="password" name="classCode" maxlength="50" required autocomplete="off" placeholder="Code provided by faculty">
+          </label>
+          <label class="check-row">
+            <input type="checkbox" name="declaration" value="yes" required>
+            <span>We confirm that the team reviewed the technical content, verified important AI-generated claims, and can explain and defend the submitted presentation.</span>
+          </label>
+          <div id="formError" class="notice error" role="alert" hidden></div>
+          <button type="submit" id="submitButton">
+            <span class="button-text">Submit team presentation</span>
+            <span class="button-wait" hidden>Preparing upload…</span>
+          </button>
+          <p class="privacy-note">Only one final file is required per team. Resubmissions are retained as new records; the most recent submission should be treated as the final version.</p>
+        </fieldset>
+      </form>
+
+      <section id="successPanel" class="success-panel" hidden tabindex="-1" aria-live="polite">
+        <div class="success-mark" aria-hidden="true">✓</div>
+        <p class="section-number">PRESENTATION RECEIVED</p>
+        <h2>Team submission recorded.</h2>
+        <dl>
+          <div><dt>Submission ID</dt><dd id="receiptId">—</dd></div>
+          <div><dt>Team</dt><dd id="receiptTeam">—</dd></div>
+          <div><dt>Topic</dt><dd id="receiptTopic">—</dd></div>
+          <div><dt>Submitted at</dt><dd id="receiptTime">—</dd></div>
+        </dl>
+        <button type="button" class="secondary" id="newSubmission">Submit another team response</button>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span id="institutionName">Department of Mechanical Engineering</span>
+    <span>NE25C08 Course Hub · Student Presentation</span>
+  </footer>
+  <iframe name="presentationTarget" id="presentationTarget" title="Presentation submission response" hidden></iframe>
+</body>
+</html>
