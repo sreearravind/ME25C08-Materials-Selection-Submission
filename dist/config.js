@@ -3,5 +3,7 @@ window.SITE_CONFIG = {
   appsScriptUrl: "https://script.google.com/macros/s/AKfycbx-kYXckEVXzYdsdHD11s78YPN5FzZQjqee3UOk_nE9yUYt51n8iTu2_xSHEa9lnFHL/exec",
   courseCode: "ME25C08",
   institutionName: "Department of Mechanical Engineering",
-  maximumPdfBytes: 3 * 1024 * 1024
+  maximumPdfBytes: 3 * 1024 * 1024,
+  maximumPresentationBytes: 10 * 1024 * 1024,
+  siteName: "NE25C08 Course Hub"
 };
