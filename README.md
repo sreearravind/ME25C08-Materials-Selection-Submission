@@ -1,34 +1,208 @@
 # NE25C08 Course Hub
 
-A mobile-friendly GitHub Pages course hub for **ME25C08 – Metallurgy and Materials Science**. The site combines course activities, student submissions, MCQ assessment and published results in one place.
+A GitHub Pages course hub for **ME25C08 – Metallurgy and Materials Science**, B.E. Mechanical Engineering, Semester 03, Section 01.
 
-> The displayed site name is **NE25C08 Course Hub** as requested. The configured course code remains **ME25C08**.
+The portal is being developed from the approved **ME25C08 Course Handout** so that the academic structure, learning materials, assignments, presentations, assessment tools and student resources remain in one consistent course package.
 
-## Current modules
+> The public hub currently uses the display title **NE25C08 Course Hub**. The official course code in the handout and portal content is **ME25C08**.
 
-- **Course Hub** – central landing page for all activities
+---
+
+## Course identity
+
+| Item | Handout information |
+|---|---|
+| Course code | ME25C08 |
+| Course title | Metallurgy and Materials Science |
+| Programme | B.E. – Mechanical Engineering |
+| Semester | 03 |
+| Section | 01 |
+| Faculty | Dr. Sreearravind M |
+| Prerequisite | – |
+| Open hour | Tuesday, 12.40 p.m. to 01.30 p.m. |
+
+### Catalog description
+
+The course introduces the constitution, processing, properties and engineering applications of metallic and non-metallic materials. It covers alloy constitution and phase diagrams, the iron–iron carbide equilibrium diagram, heat-treatment processes, ferrous and non-ferrous alloys, polymers, ceramics and composites, and the mechanical testing and failure mechanisms of engineering materials.
+
+The handout emphasises the relationship among **processing, microstructure, properties and performance** for informed materials selection.
+
+---
+
+## Course objectives
+
+1. Learn the construction and interpretation of phase diagrams and the use of the iron–iron carbide phase diagram for understanding microstructure formation.
+2. Learn the selection and application of heat-treatment processes and the associated microstructure formation.
+3. Illustrate different ferrous and non-ferrous alloys and their uses in engineering.
+4. Illustrate polymers, ceramics and composites and their uses in engineering.
+5. Learn material-testing procedures and failure mechanisms in engineering applications.
+
+## Course Outcomes (COs)
+
+- **CO1:** Explain alloys and phase diagrams, the iron–iron carbide diagram and steel classification.
+- **CO2:** Explain isothermal transformation, continuous cooling diagrams and different heat-treatment processes.
+- **CO3:** Clarify the effect of alloying elements on ferrous and non-ferrous metals.
+- **CO4:** Summarize the properties and applications of non-metallic materials.
+- **CO5:** Explain the testing of mechanical properties and major deformation and failure mechanisms.
+
+The full **CO–PO/PSO correlation matrix**, PO/PSO definitions and correlation scale are available on the Course Information page.
+
+---
+
+## Course syllabus
+
+The course contains **45 periods: 5 units × 9 periods**.
+
+### Unit I – Constitution of Alloys and Phase Diagrams
+Alloy constitution, solid solutions, phase diagrams, invariant reactions, Fe–Fe₃C equilibrium diagram, steels and cast irons.
+
+### Unit II – Heat Treatment
+Annealing treatments, normalising, hardening, tempering, TTT/CCT diagrams, austempering, martempering, hardenability, surface/case hardening, thermo-mechanical treatments and elementary sintering.
+
+### Unit III – Ferrous and Non-Ferrous Metals
+Alloying additions in steel; stainless, tool, HSLA and maraging steels; cast irons; Cu, Al, Ti and Mg alloys; nickel-based superalloys; shape-memory alloys; materials standards.
+
+### Unit IV – Non-Metallic Materials
+Commodity and engineering polymers, high-performance polymers, thermosets, engineering ceramics, intermetallics, composites and nanocomposites.
+
+### Unit V – Mechanical Properties and Deformation Mechanisms
+Plastic deformation, slip and twinning, fracture, Griffith theory, mechanical testing, hardness, impact, fatigue and creep mechanisms.
+
+The complete syllabus text from the handout is reproduced on:
+
+`dist/course-info.html`
+
+---
+
+## Learning resources in the course handout
+
+### Text books – Appendix 4.2
+
+1. Kenneth G. Budinski and Michael K. Budinski, *Engineering Materials*, Prentice Hall of India Private Limited, 9th edition, 2018.
+2. Sydney H. Avner, *Introduction to Physical Metallurgy*, McGraw-Hill Book Company, 1994.
+
+### Reference books – Appendix 4.2
+
+1. A. Alavudeen, N. Venkateshwaran and J. T. Winowlin Jappes, *A Textbook of Engineering Materials and Metallurgy*, Laxmi Publications, 2006.
+2. Amandeep Singh Wadhwa and Harvinder Singh Dhaliwal, *A Textbook of Engineering Material and Metallurgy*, University Sciences Press, 2008.
+3. G. S. Upadhyay and Anish Upadhyay, *Materials Science and Engineering*, Viva Books Pvt. Ltd., New Delhi, 2020.
+4. V. Raghavan, *Materials Science and Engineering*, Prentice Hall of India Pvt. Ltd., 6th edition, 2019.
+5. William D. Callister, *Material Science and Engineering*, Wiley India Pvt. Ltd., 2nd edition reprint, 2019.
+
+### Recommended NPTEL courses
+
+- Introduction to Materials Science and Engineering  
+  https://nptel.ac.in/courses/113102080
+- Phase Diagrams in Materials Science and Engineering  
+  https://nptel.ac.in/courses/113104068
+
+### Content beyond syllabus listed in the handout
+
+- Data-driven materials selection and introductory materials informatics
+- Sustainable materials selection, recycling and circular-material flows
+- Additive-manufacturing process–microstructure–property relationships
+- Failure-analysis documentation and digital traceability of test data
+
+---
+
+## Teaching–learning pedagogy documented in the handout
+
+- Lesson plan and course handout
+- Session plan and session handout
+- Open hours
+- Students' seminar
+- Poster presentation
+- Content beyond the syllabus
+- Learning Management System (LMS)
+- Collaborative teaching/learning – joint presentation or group problem solving
+- Assignments / Quiz
+
+The course hub is intended to provide the digital layer for these course activities.
+
+---
+
+## Current Course Hub modules
+
+### Academic foundation
+- **Course Information** – course overview, objectives, COs, CO–PO/PSO mapping, syllabus, assessment structure, books and NPTEL links
+
+### Learning activities
 - **AI-Assisted Materials Selection** – individual report submission with AI-use, verification and reflection record
-- **Student Technical Presentation** – 11 group-presentation topics, team allocation and one-file team submission
-- **MCQ Test** – existing assessment module
-- **Evaluation Results** – existing student result/feedback module
-- **Course Materials** – placeholder for future Unit I–V PDFs
-- **Question Bank** – placeholder for a future centralized question bank
+- **Student Technical Presentation** – 11 presentation topics with team allocation and team file submission
 
-GitHub stores only the website code. Student submission files are sent to the faculty Google Drive through Google Apps Script, while submission metadata is stored in Google Sheets.
+### Assessment and feedback
+- **MCQ Test** – existing assessment module
+- **Evaluation Results** – published activity evaluation and feedback
+
+### Planned learning-resource modules
+- **Unit-wise Course Materials**
+- **Central Question Bank**
+- **Revision Helper**
+- **Student / Faculty access layer**
+
+---
+
+## Phase 1 – Academic foundation
+
+Phase 1 adds the handout-based academic structure to the public portal.
+
+### Implemented
+- Course overview
+- Course objectives
+- CO1–CO5
+- CO–PO/PSO mapping
+- PO and PSO definitions
+- Full Unit I–V syllabus
+- Evaluation structure from the handout
+- Text books and reference books
+- Recommended e-books
+- NPTEL links
+- Content-beyond-syllabus directions
+- Direct link to the official course handout
+- Course Hub entry for Course Information
+- README revised around the course handout
+
+### Source of truth
+
+`Files/ME25C08_Metallurgy_and_Materials_Science_Course_Handout.pdf`
+
+The handout remains the academic source of truth. Portal content should not silently replace or reinterpret handout content.
+
+---
+
+## Files currently available in the repository
+
+```text
+Files/
+  ME25C08_Metallurgy_and_Materials_Science_Course_Handout.pdf
+  ME25CO8_Unit1_student_notes_final.pdf
+  ME25CO8_Unit2_student_notes.pdf
+  ME25CO8_Unit3_student_notes.pdf
+  ME25CO8_Unit4_student_notes.pdf
+  ME25C08_Units_III_IV_Question_Bank_and_AT2_QA_Student_September_2026.pdf
+```
+
+The Unit I–IV filenames currently use `ME25CO8` in several filenames (letter O before 8). They can be standardised to `ME25C08` during the learning-resource phase before permanent portal links are finalised.
+
+The GitHub Pages workflow currently publishes the `dist/` directory only. Files stored under `Files/` can still be linked through their GitHub/raw URLs; Phase 2 will organise those resources into student-facing Unit pages.
+
+---
 
 ## Website structure
 
 ```text
 dist/
-  index.html                 NE25C08 Course Hub
+  index.html                 Course Hub
   hub.css
-  materials-selection.html   Existing individual AI-assisted assignment
+  course-info.html           Phase 1 academic foundation
+  course-info.css
+  materials-selection.html   AI-assisted individual activity
   app.js
   styles.css
-  presentation.html          New group presentation module
+  presentation.html          Group presentation module
   presentation.css
   presentation.js
-  presentation-data.js       Faculty-editable team/topic allocation
+  presentation-data.js
   quiz.html
   quiz.css
   quiz.js
@@ -40,193 +214,83 @@ dist/
   monitor.js
   config.js
 
+Files/
+  course handout
+  unit notes
+  question-bank / assessment resources
+
 apps-script/
-  code.gs                    Shared backend for assignment, presentation and quiz
+  code.gs
   appsscript.json
 
 .github/workflows/
-  deploy-pages.yml           Publishes dist/ to GitHub Pages
+  deploy-pages.yml
 ```
+
+GitHub stores the website code and public course resources. Student submission files are sent through Google Apps Script to the faculty Google Drive, and submission metadata is stored in Google Sheets.
+
+---
 
 ## Student Technical Presentation module
 
-### Design
-
 - 33 students → **11 teams × 3 students**
-- 11 technical topics spanning the four course-file presentation themes
-- Team selector from **Team 01** to **Team 11**
-- One final file per submission
-- Accepted formats: **PDF, PPT and PPTX**
-- Strict maximum file size: **10 MB**
-- Short AI-use and verification record
+- 11 technical topics based on the four presentation themes in the course handout
+- PDF / PPT / PPTX
+- 10 MB maximum file size
+- AI-use and independent verification record
 - Class submission code
 - Team declaration
-- Server-generated submission receipt
-- Resubmissions retained as separate records
-- Dedicated Drive folder with **Team_01 … Team_11** subfolders
+- Submission receipt
+- Resubmission tracking
+- Team-wise Google Drive folders
 
-### Presentation themes
+The team allocation remains controlled in:
 
-1. Materials selection for automotive, aerospace and energy applications
-2. Nickel-based superalloys and shape-memory alloys
-3. Engineering polymers, ceramics and composites in modern products
-4. Industrial fatigue, creep and fracture case studies
+`dist/presentation-data.js`
 
-### Faculty shuffle / allocation
+---
 
-The presentation page is intentionally shipped with team allocations unpublished.
+## Google Apps Script
 
-Edit only `dist/presentation-data.js` after the final shuffle.
+The shared Apps Script backend supports:
+- Materials Selection submissions
+- Presentation submissions
+- Quiz monitoring/results
 
-Example:
+For the presentation module, the deployed Apps Script project must contain the current `apps-script/code.gs`, `setupPresentationModule()` must be run once, and the Web App deployment must be updated to a new version.
 
-```js
-window.PRESENTATION_DATA = {
-  assignmentsPublished: true,
-  topics: [
-    // keep the existing topic list
-  ],
-  teams: [
-    {
-      team: "01",
-      members: ["Student A", "Student B", "Student C"],
-      topicId: 7
-    }
-    // Teams 02–11
-  ]
-};
-```
+The private class code must remain in the Apps Script project and must not be committed to GitHub.
 
-Set:
-
-```js
-assignmentsPublished: true
-```
-
-only after all 11 teams and topic IDs are finalized. Until then, students can view the topic list but presentation upload remains disabled.
-
-## Google Apps Script setup
-
-The existing Apps Script deployment is reused, but the deployed script must be updated once to enable presentation uploads.
-
-### Existing installation
-
-1. Open the Google Apps Script project currently used by this course portal.
-2. Replace its `Code.gs` with the latest `apps-script/code.gs` from this repository.
-3. Confirm that your private `INITIAL_CLASS_CODE` remains set correctly.
-4. Run **`setupPresentationModule()`** once.
-5. Approve permissions if Google requests them.
-6. Open the execution log. It will show:
-   - the existing spreadsheet URL
-   - the new presentation Drive folder URL
-7. Choose **Deploy → Manage deployments**.
-8. Edit the existing Web App deployment and create a **New version**.
-9. Keep **Execute as: Me** and the same access setting used by the existing portal.
-10. Deploy.
-
-The Web App URL normally remains unchanged, so `dist/config.js` does not need to be changed if the same deployment is updated.
-
-### Fresh installation
-
-For a completely new Apps Script project:
-
-1. Change `INITIAL_CLASS_CODE` in `apps-script/code.gs`.
-2. Run **`setupProject()`**.
-3. Deploy the project as a Web App.
-4. Put the resulting `/exec` URL in `dist/config.js`.
-
-`setupProject()` now prepares both the original Materials Selection resources and the presentation resources.
-
-## Presentation storage and record
-
-The presentation backend creates/uses:
-
-### Google Sheet tab
-
-`Presentation Submissions`
-
-Recorded fields include:
-
-- server timestamp
-- submission ID
-- first submission / resubmission status
-- team number
-- assigned topic
-- submitted-by student
-- primary AI tool
-- AI contribution
-- independently verified technical claim
-- verification source
-- file name and type
-- file size
-- Google Drive URL
-- client timestamp
-
-### Google Drive
-
-```text
-ME25C08 – Student Presentations/
-  Team_01/
-  Team_02/
-  ...
-  Team_11/
-```
-
-The backend independently enforces the **10 MB** limit and validates PDF/PPT/PPTX signatures. The browser also checks size and extension before upload.
-
-Maximum storage if every team uploads one 10 MB file is approximately **110 MB**. Resubmissions add additional storage because earlier versions are intentionally retained.
-
-## Original Materials Selection module
-
-The original submission form is preserved at:
-
-```text
-materials-selection.html
-```
-
-It continues to support:
-
-- assigned engineering application
-- AI model and prompts
-- PDF report up to 3 MB or direct report text
-- verification sources
-- corrections and reflection
-- class submission code
-- Drive/Sheet storage
-- submission receipt and resubmission tracking
-
-## Configuration
-
-`dist/config.js` contains:
-
-- Apps Script Web App endpoint
-- course code
-- department/institution label
-- 3 MB Materials Selection PDF limit
-- 10 MB Presentation file limit
-- course-hub display name
-
-Do **not** put the private class submission code in GitHub. It must remain in the Apps Script project properties/setup.
+---
 
 ## GitHub Pages deployment
 
-The existing GitHub Actions workflow publishes the `dist` folder whenever changes reach `main`.
+The existing GitHub Actions workflow publishes `dist/` whenever changes reach `main`.
 
-Live site pattern:
+Public site:
 
 ```text
 https://sreearravind.github.io/ME25C08-Materials-Selection-Submission/
 ```
 
-## Recommended next expansion
+Repository:
 
-The Course Hub already contains placeholders for:
+```text
+https://github.com/sreearravind/ME25C08-Materials-Selection-Submission
+```
 
-- Unit I PDF materials
-- Unit II PDF materials
-- Unit III PDF materials
-- Unit IV PDF materials
-- Unit V PDF materials
-- centralized question bank
+---
 
-These can be added later without changing the assignment, presentation, quiz or results modules.
+## Development roadmap
+
+### Phase 1 – Academic foundation
+Course Information, syllabus, CO/PO/PSO, references/NPTEL and README. **Implemented in this phase.**
+
+### Phase 2 – Learning resources
+Activate Unit I–IV materials, add Unit V when available, standardise filenames and build the central Question Bank.
+
+### Phase 3 – Revision support
+Assessment-Test revision helper, syllabus-aware practice, topic checklists and revision MCQs.
+
+### Phase 4 – Personalisation
+Student access and faculty administration after authentication/privacy requirements are fixed.
