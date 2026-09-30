@@ -143,6 +143,43 @@
       </section>
 
       <section class="section">
+        <div class="section-heading">
+          <p class="kicker">INTERNAL ASSESSMENT MARKS · FACULTY ONLY</p>
+          <h2>AT-1, AT-2 and Model Test</h2>
+          <p>These marks are available only inside Faculty Administration. AT-1 is populated from the uploaded Internal Assessment Test-I statement. AT-2 and Model Test are ready for later entry.</p>
+        </div>
+
+        <div class="notice warn">
+          <strong>Faculty-only record:</strong> these marks are stored in the private course spreadsheet and are not shown on the Student Dashboard.
+        </div>
+
+        <div class="admin-tools">
+          <label>Search marks
+            <input id="marksSearch" type="search" placeholder="Name or registration number">
+          </label>
+          <button type="button" id="saveAssessmentMarks">Save all marks</button>
+        </div>
+
+        <div id="marksMessage" class="notice success" hidden></div>
+        <div id="marksError" class="notice error" hidden></div>
+
+        <div class="table-wrap">
+          <table class="admin-table marks-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>AT-1 / 100</th>
+                <th>AT-2 / 100</th>
+                <th>Model Test / 100</th>
+              </tr>
+            </thead>
+            <tbody id="marksTableBody"></tbody>
+          </table>
+        </div>
+        <p class="privacy-note">Enter a mark from 0 to 100, leave blank if not yet entered, or type <strong>Abs</strong> for absent.</p>
+      </section>
+
+      <section class="section">
         <div class="panel password-panel">
           <p class="mini">FACULTY SECURITY</p>
           <h2>Change faculty password</h2>
