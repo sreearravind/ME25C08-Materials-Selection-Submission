@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ME25C08 self-study practice MCQs with instant explanations">
+  <meta name="theme-color" content="#10263f">
+  <title>Practice MCQs | NE25C08 Course Hub</title>
+  <link rel="stylesheet" href="revision.css">
+  <script src="config.js"></script>
+  <script src="revision-data.js"></script>
+  <script src="practice-mcq.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">PQ</div>
+    <div class="brand-copy">
+      <p class="eyebrow" id="courseCode">ME25C08</p>
+      <h1>Practice MCQs</h1>
+      <p>Self-study · instant explanation · no marks recorded</p>
+    </div>
+    <nav class="top-actions">
+      <a href="index.html">Course Hub</a>
+      <a href="revision-helper.html">Revision Helper</a>
+      <a href="unit-materials.html">Unit Materials</a>
+      <a href="quiz.html">Formal MCQ Test</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero">
+      <div>
+        <p class="kicker">RETRIEVAL PRACTICE</p>
+        <h2>Check what you can recall without opening the notes.</h2>
+        <p>These questions are a separate self-study bank created for revision around the ME25C08 syllabus. They are not the formal AT quiz and are not copied from the live assessment. Answers and explanations are shown during practice.</p>
+      </div>
+      <a class="primary-action" href="revision-helper.html">Return to Revision Helper →</a>
+    </section>
+
+    <div class="notice info-notice">
+      <strong>No submission:</strong> this page does not send scores, names or answers to Google Sheets or the faculty. Refreshing or starting a new set creates another private practice session.
+    </div>
+
+    <section class="section" id="setupSection">
+      <div class="section-heading">
+        <p class="kicker">BUILD A PRACTICE SET</p>
+        <h2>Choose the scope and number of questions</h2>
+      </div>
+      <div class="panel">
+        <div class="quiz-setup">
+          <label>Practice scope
+            <select id="scopeSelect">
+              <optgroup label="Assessment preparation">
+                <option value="AT1">AT1 · Units I–II</option>
+                <option value="AT2">AT2 · Units III–IV</option>
+                <option value="AT3">AT3 · Unit V</option>
+                <option value="MODEL">Model Exam · Units I–V</option>
+              </optgroup>
+              <optgroup label="Individual units">
+                <option value="UNIT:I">Unit I</option>
+                <option value="UNIT:II">Unit II</option>
+                <option value="UNIT:III">Unit III</option>
+                <option value="UNIT:IV">Unit IV</option>
+                <option value="UNIT:V">Unit V</option>
+              </optgroup>
+            </select>
+          </label>
+          <label>Number of questions
+            <select id="countSelect">
+              <option value="10">10 questions</option>
+              <option value="20">20 questions</option>
+              <option value="ALL">All available in scope</option>
+            </select>
+          </label>
+          <button type="button" id="startQuiz">Start practice</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section quiz-shell" id="quizSection" hidden>
+      <div class="quiz-meta">
+        <span id="questionCounter">Question 1</span>
+        <span id="runningScore">Score 0</span>
+      </div>
+      <div class="question-card">
+        <p class="mini" id="questionUnit">UNIT I</p>
+        <h2 id="questionText"></h2>
+        <div id="optionList" class="option-list"></div>
+        <div id="feedback" class="feedback" hidden></div>
+        <div class="quiz-nav">
+          <button type="button" id="nextQuestion" hidden>Next question</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section quiz-shell" id="resultSection" hidden>
+      <div class="result-card">
+        <p class="kicker">PRACTICE COMPLETE</p>
+        <div class="score-big" id="finalScore">0 / 0</div>
+        <p class="score-note" id="finalNote"></p>
+        <div id="unitResults" class="unit-results"></div>
+        <div id="missedWrap" hidden>
+          <h3>Questions to revisit</h3>
+          <p class="score-note">Use these explanations only after trying the question. Then return to the related unit material or checklist.</p>
+          <div id="missedList" class="missed-list"></div>
+        </div>
+        <div class="button-row">
+          <button type="button" id="retryQuiz">Practise another set</button>
+          <a class="primary-action" href="revision-helper.html">Open Revision Helper</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="notice">
+        <strong>Coverage note:</strong> Unit V practice questions are syllabus-aligned self-study questions. A Unit V student-notes PDF has not yet been uploaded to the repository, so use the Course Information syllabus and your classroom notes until that resource is added.
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span id="institutionName">Department of Mechanical Engineering</span>
+    <span>ME25C08 · Self-study Practice MCQs</span>
+  </footer>
+</body>
+</html>
