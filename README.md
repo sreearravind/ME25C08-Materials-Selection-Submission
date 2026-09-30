@@ -135,12 +135,15 @@ The course hub is intended to provide the digital layer for these course activit
 - **AI-Assisted Materials Selection** – individual report submission with AI-use, verification and reflection record
 - **Student Technical Presentation** – 11 presentation topics with team allocation and team file submission
 
+### Student learning support
+- **Revision Helper** – AT1 / AT2 / AT3 / Model Exam preparation paths, timed study planning and browser-local topic completion tracking
+- **Practice MCQs** – separate self-study question bank with shuffled answer order, instant explanations and no backend submission
+
 ### Assessment and feedback
-- **MCQ Test** – existing assessment module
+- **MCQ Test** – existing formal assessment module
 - **Evaluation Results** – published activity evaluation and feedback
 
 ### Planned modules
-- **Revision Helper**
 - **Student / Faculty access layer**
 
 ---
@@ -210,6 +213,72 @@ The Phase 2 portal does not generate or infer missing question-bank content. New
 
 ---
 
+## Phase 3 – Student learning support
+
+Phase 3 adds revision and retrieval-practice tools without changing the formal assessment backend.
+
+### Assessment preparation mapping
+
+The Revision Helper follows the sequence in the course handout's detailed academic calendar:
+
+| Preparation path | Revision scope |
+|---|---|
+| AT1 | Units I and II |
+| AT2 | Units III and IV |
+| AT3 | Unit V |
+| Model Examination | Units I–V |
+
+### Revision Helper
+
+`dist/revision-helper.html`
+
+Features:
+
+- selectable AT1 / AT2 / AT3 / Model Exam preparation
+- timed study planner for 30, 60, 90, 120 or 180 minutes
+- per-unit time allocation
+- suggested notes/concepts → closed-book recall → question-practice split
+- complete topic checklist based on the handout academic-calendar sequence
+- progress bar
+- browser-local checklist persistence using `localStorage`
+- reset control for each assessment
+- links back to Unit Materials and the current Units III–IV Question Bank
+- Unit V clearly identified as handout/classroom-note based until its PDF is uploaded
+
+No checklist data is sent to Google Sheets or the faculty.
+
+### Practice MCQs
+
+`dist/practice-mcq.html`
+
+Features:
+
+- assessment scopes: AT1, AT2, AT3 and Model Exam
+- individual Unit I–V practice scopes
+- 10-question, 20-question or all-available practice sets
+- 40 self-study questions across the five units
+- randomized question order
+- randomized answer-option order
+- instant correctness feedback
+- explanation after answering
+- end-of-session score and unit-wise performance summary
+- missed-question review
+- no student identity collection
+- no Google Apps Script or Google Sheets submission
+
+The practice bank is intentionally separate from the formal `quiz.html` assessment and does not reuse the live assessment workflow.
+
+### Integration
+
+Phase 3 adds Revision Helper / Practice MCQ navigation to:
+
+- Course Hub
+- Unit Materials
+- Unit I–IV pages
+- Central Question Bank
+
+---
+
 ## Files currently available in the repository
 
 ```text
@@ -243,6 +312,12 @@ dist/
   unit-iv.html                Unit IV learning page
   question-bank.html          Central Question Bank
   learning-resources.css      Shared Phase 2 styles
+  revision-helper.html        Phase 3 AT preparation and topic tracking
+  revision-helper.js
+  practice-mcq.html           Phase 3 self-study practice
+  practice-mcq.js
+  revision-data.js            Unit, assessment and practice question data
+  revision.css                Shared Phase 3 styles
   materials-selection.html   AI-assisted individual activity
   app.js
   styles.css
@@ -336,8 +411,8 @@ Course Information, syllabus, CO/PO/PSO, references/NPTEL and README. **Implemen
 ### Phase 2 – Learning resources
 Unit I–IV resource pages and the centralized Question Bank are **implemented**. Unit V and missing unit-wise question-bank resources remain pending until files are uploaded.
 
-### Phase 3 – Revision support
-Assessment-Test revision helper, syllabus-aware practice, topic checklists and revision MCQs.
+### Phase 3 – Student learning support
+Revision Helper, AT preparation, browser-local topic tracking and self-study Practice MCQs are **implemented**.
 
 ### Phase 4 – Personalisation
 Student access and faculty administration after authentication/privacy requirements are fixed.
