@@ -112,7 +112,8 @@ function doPost(e) {
   } catch (error) {
     console.error(error && error.stack ? error.stack : error);
     result = {
-      responseType: action ? action + '-result' : 'materials-submission-result',
+      responseType: action === 'presentationSubmission' ? 'presentation-submission-result' :
+        (action ? action + '-result' : 'materials-submission-result'),
       ok: false,
       message: safeErrorMessage_(error)
     };
