@@ -139,12 +139,13 @@ The course hub is intended to provide the digital layer for these course activit
 - **Revision Helper** – AT1 / AT2 / AT3 / Model Exam preparation paths, timed study planning and browser-local topic completion tracking
 - **Practice MCQs** – separate self-study question bank with shuffled answer order, instant explanations and no backend submission
 
+### Personalised access
+- **Student Dashboard** – authenticated registration-number + PIN access to individual submission status, formal MCQ result, presentation-team status and published rubric feedback
+- **Faculty Administration** – authenticated roster/access management, team assignment, PIN reset, evaluation publication control and course-status overview
+
 ### Assessment and feedback
 - **MCQ Test** – existing formal assessment module
-- **Evaluation Results** – published activity evaluation and feedback
-
-### Planned modules
-- **Student / Faculty access layer**
+- **Secure Evaluation Results** – individual written feedback moved from the public results list into the authenticated Student Dashboard
 
 ---
 
@@ -279,6 +280,144 @@ Phase 3 adds Revision Helper / Practice MCQ navigation to:
 
 ---
 
+## Phase 4 – Personalisation and authentication
+
+Phase 4 adds a server-side authentication layer using the existing Google Apps Script / Google Sheets architecture.
+
+### Access model
+
+Public without login:
+- Course Information
+- Unit Materials
+- Question Bank
+- Revision Helper
+- Practice MCQs
+- learning activity pages
+
+Authenticated student access:
+- personal profile
+- assigned Materials Selection application
+- Materials Selection submission status
+- latest formal MCQ score/result
+- presentation team and submission status
+- published Materials Selection rubric evaluation
+
+Authenticated faculty access:
+- course-wide activity summary
+- student roster
+- active/inactive access control
+- presentation team-number assignment for the private Student Dashboard
+- student PIN reset
+- evaluation publish/unpublish control
+- faculty password change
+
+### Authentication design
+
+Student credentials:
+- registration number + PIN
+- temporary PIN generated during setup
+- temporary PIN must be changed by the student
+- server stores only a salted hash of the current PIN
+- temporary plaintext PINs are written only to the private `Initial Student PINs` Google Sheet for distribution
+
+Faculty credential:
+- generated during `setupPersonalisation()`
+- temporary password appears once in the Apps Script execution log
+- only a salted hash is stored in Script Properties
+- if lost, run `resetFacultyPassword()` from the Apps Script editor
+
+Sessions:
+- random session tokens are sent only after successful login
+- browser stores the raw token in `sessionStorage`
+- Google Sheets stores only a hash of the session token
+- student session lifetime: 8 hours
+- faculty session lifetime: 2 hours
+- faculty password changes invalidate all faculty sessions
+- student PIN resets invalidate that student's existing sessions
+
+Login protection:
+- identical student-login error message whether the registration number or PIN is wrong
+- five failed attempts trigger a 10-minute server-side rate limit for that account/key
+
+### Private sheets created
+
+`setupPersonalisation()` creates/uses:
+
+- `Student Access`
+- `Auth Sessions`
+- `Student Results`
+- `Initial Student PINs`
+
+The student roster is bootstrapped from the existing 33-student Materials Selection allocation already present in the repository.
+
+The existing Materials Selection evaluations are migrated once into `Student Results` so the Student Dashboard can reproduce the individual rubric feedback privately.
+
+### Public results privacy change
+
+The old public `results.html` page no longer lists student names, marks or feedback. It now directs students to the authenticated Student Dashboard.
+
+The current-branch `dist/results.js` no longer contains the evaluation dataset.
+
+**Repository-history note:** earlier Git commits already contained the public result data. Phase 4 removes it from the live branch and live website, but Git history is immutable unless it is explicitly rewritten. If complete historical removal is required, perform a separate repository-history purge after confirming the secure migration.
+
+### Student Dashboard
+
+Files:
+- `dist/student-access.html`
+- `dist/student-dashboard.js`
+- `dist/auth-client.js`
+- `dist/auth.css`
+
+The dashboard displays only data associated with the authenticated registration number.
+
+### Faculty Administration
+
+Files:
+- `dist/faculty-admin.html`
+- `dist/faculty-admin.js`
+
+Faculty actions include:
+- add/update a student
+- enable/disable student access
+- assign Team 01–11 to a student dashboard profile
+- generate a new temporary student PIN
+- publish or hide an imported evaluation
+- change the faculty password
+
+Team-number assignment in Faculty Administration personalises the private Student Dashboard. It does **not** automatically rewrite `dist/presentation-data.js` or publish team-topic allocation on the public Presentation page.
+
+### One-time Phase 4 deployment
+
+Phase 4 requires the Apps Script backend to be updated.
+
+1. Open the existing Google Apps Script project used by the course portal.
+2. Replace `Code.gs` with the latest `apps-script/code.gs` from this repository.
+3. Save.
+4. Run **`setupPersonalisation()`** once from the Apps Script editor.
+5. Approve any requested Google permissions.
+6. Open the execution log and save the generated **temporary faculty password**.
+7. Open the existing course spreadsheet. A new **Initial Student PINs** sheet will contain the temporary PIN for each newly created student account.
+8. Distribute each PIN privately to the corresponding student.
+9. After successful distribution, delete the **Initial Student PINs** sheet (the backend will recreate an empty sheet if later needed for newly added students).
+10. Go to **Deploy → Manage deployments**.
+11. Edit the existing Web App deployment and choose **New version**.
+12. Keep the existing **Execute as: Me** and access settings.
+13. Deploy.
+
+If the same Web App deployment is updated, its `/exec` URL should remain unchanged and `dist/config.js` does not need a new endpoint.
+
+### Login pages
+
+Student:
+`student-access.html`
+
+Faculty:
+`faculty-admin.html`
+
+The legacy `results.html` route remains as a compatibility/privacy handoff page.
+
+---
+
 ## Files currently available in the repository
 
 ```text
@@ -318,6 +457,12 @@ dist/
   practice-mcq.js
   revision-data.js            Unit, assessment and practice question data
   revision.css                Shared Phase 3 styles
+  student-access.html          Phase 4 authenticated Student Dashboard
+  student-dashboard.js
+  faculty-admin.html           Phase 4 authenticated Faculty Administration
+  faculty-admin.js
+  auth-client.js               Shared secure Apps Script request bridge
+  auth.css                     Shared Phase 4 styles
   materials-selection.html   AI-assisted individual activity
   app.js
   styles.css
@@ -378,6 +523,9 @@ The shared Apps Script backend supports:
 - Materials Selection submissions
 - Presentation submissions
 - Quiz monitoring/results
+- student authentication and private dashboard data
+- faculty authentication and administration
+- secure migration/publication of individual evaluation results
 
 For the presentation module, the deployed Apps Script project must contain the current `apps-script/code.gs`, `setupPresentationModule()` must be run once, and the Web App deployment must be updated to a new version.
 
@@ -415,4 +563,4 @@ Unit I–IV resource pages and the centralized Question Bank are **implemented**
 Revision Helper, AT preparation, browser-local topic tracking and self-study Practice MCQs are **implemented**.
 
 ### Phase 4 – Personalisation
-Student access and faculty administration after authentication/privacy requirements are fixed.
+Authenticated Student Dashboard, Faculty Administration, secure student-result migration and public-results privacy transition are **implemented in the repository**. The Apps Script one-time setup/redeployment steps above are required before login becomes live.

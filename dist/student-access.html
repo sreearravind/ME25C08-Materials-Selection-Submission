@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ME25C08 authenticated student dashboard">
+  <meta name="theme-color" content="#10263f">
+  <title>Student Dashboard | NE25C08 Course Hub</title>
+  <link rel="stylesheet" href="auth.css">
+  <script src="config.js"></script>
+  <script src="auth-client.js"></script>
+  <script src="student-dashboard.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">SD</div>
+    <div class="brand-copy">
+      <p class="eyebrow" id="courseCode">ME25C08</p>
+      <h1>Student Dashboard</h1>
+      <p>Private status, feedback and course access</p>
+    </div>
+    <nav class="top-actions">
+      <a href="index.html">Course Hub</a>
+      <a href="unit-materials.html">Unit Materials</a>
+      <a href="revision-helper.html">Revision Helper</a>
+      <button type="button" id="logoutTop" hidden>Sign out</button>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section id="loginView" class="auth-shell">
+      <div class="auth-card">
+        <p class="kicker">PRIVATE STUDENT ACCESS</p>
+        <h2>Sign in to your ME25C08 dashboard</h2>
+        <p class="privacy-note">Use the registration number and temporary/personal PIN provided by the faculty. Your PIN is checked by the Google Apps Script backend and is not stored in this webpage or GitHub.</p>
+        <form id="loginForm" novalidate>
+          <label>Registration number
+            <input id="registrationNumber" name="registrationNumber" required maxlength="30" autocomplete="username" placeholder="e.g. 25ME001">
+          </label>
+          <label>PIN
+            <input id="pin" name="pin" type="password" required maxlength="64" autocomplete="current-password" placeholder="Enter your PIN">
+          </label>
+          <div id="loginError" class="notice error" hidden></div>
+          <div class="button-row">
+            <button type="submit" id="loginButton">Sign in</button>
+            <a class="button-link secondary" href="index.html">Back to Course Hub</a>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="loadingView" class="auth-shell" hidden>
+      <div class="auth-card loading"><span class="spinner"></span><span>Loading your dashboard…</span></div>
+    </section>
+
+    <section id="dashboardView" hidden>
+      <div class="dashboard-head">
+        <div>
+          <p class="kicker">AUTHENTICATED STUDENT</p>
+          <h2 id="studentGreeting">Welcome</h2>
+          <p id="studentMeta"></p>
+        </div>
+        <div class="button-row">
+          <button type="button" class="secondary" id="refreshDashboard">Refresh</button>
+          <button type="button" id="logoutButton">Sign out</button>
+        </div>
+      </div>
+
+      <div id="pinChangeNotice" class="notice warn" hidden>
+        <strong>Temporary PIN detected.</strong> Change it now before continuing to use the dashboard.
+      </div>
+
+      <section id="pinChangePanel" class="panel password-panel" hidden>
+        <p class="mini">SECURITY</p>
+        <h2>Set your personal PIN</h2>
+        <p class="privacy-note">Use 6–32 characters with no spaces. The server stores only a salted hash of this PIN.</p>
+        <form id="pinChangeForm">
+          <div class="form-grid">
+            <label>New PIN
+              <input type="password" id="newPin" minlength="6" maxlength="32" required autocomplete="new-password">
+            </label>
+            <label>Confirm new PIN
+              <input type="password" id="confirmPin" minlength="6" maxlength="32" required autocomplete="new-password">
+            </label>
+          </div>
+          <div id="pinError" class="notice error" hidden></div>
+          <button type="submit">Change PIN</button>
+        </form>
+      </section>
+
+      <section class="section">
+        <div class="profile-grid">
+          <article class="status-card">
+            <p class="mini">STUDENT</p>
+            <h3 id="profileName">—</h3>
+            <p id="profileReg">—</p>
+          </article>
+          <article class="status-card">
+            <p class="mini">MATERIALS SELECTION</p>
+            <h3>Assigned application</h3>
+            <p id="profileApplication">—</p>
+          </article>
+          <article class="status-card">
+            <p class="mini">PRESENTATION TEAM</p>
+            <h3 id="profileTeam">Not assigned</h3>
+            <p id="profileTeamNote">Faculty can publish team allocation later.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="kicker">MY COURSE STATUS</p>
+          <h2>Submissions and formal assessment</h2>
+        </div>
+        <div class="dashboard-grid">
+          <article class="status-card">
+            <p class="mini">AI-ASSISTED MATERIALS SELECTION</p>
+            <span id="materialsPill" class="status-pill pending">No submission recorded</span>
+            <h3 id="materialsTitle">Materials Selection</h3>
+            <p id="materialsDetail">No submission is currently linked to this registration number.</p>
+            <div class="button-row"><a class="button-link secondary" href="materials-selection.html">Open activity</a></div>
+          </article>
+
+          <article class="status-card">
+            <p class="mini">FORMAL MCQ</p>
+            <span id="quizPill" class="status-pill pending">No result recorded</span>
+            <h3 id="quizTitle">MCQ Assessment</h3>
+            <p id="quizDetail">No submitted formal MCQ result is currently linked to this registration number.</p>
+            <div class="button-row"><a class="button-link secondary" href="quiz.html">Open formal MCQ</a></div>
+          </article>
+
+          <article class="status-card">
+            <p class="mini">GROUP PRESENTATION</p>
+            <span id="presentationPill" class="status-pill pending">Team allocation pending</span>
+            <h3 id="presentationTitle">Student Technical Presentation</h3>
+            <p id="presentationDetail">Your team status will appear after team allocation is entered by the faculty.</p>
+            <div class="button-row"><a class="button-link secondary" href="presentation.html">Open presentation module</a></div>
+          </article>
+
+          <article class="status-card">
+            <p class="mini">SECURE EVALUATION</p>
+            <span id="evaluationPill" class="status-pill pending">Not published</span>
+            <h3 id="evaluationTitle">Materials Selection Evaluation</h3>
+            <p id="evaluationDetail">Your individual rubric feedback will appear here when published.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="evaluationPanel" hidden>
+        <div class="section-heading">
+          <p class="kicker">PRIVATE INDIVIDUAL FEEDBACK</p>
+          <h2>Materials Selection evaluation</h2>
+          <p>Written submission evaluation only. Presentation/oral-defence marks remain separate unless later published by the faculty.</p>
+        </div>
+        <div class="panel">
+          <div class="dashboard-head">
+            <div>
+              <h2 id="evaluationApplication">—</h2>
+              <p>Rubric-based written evaluation</p>
+            </div>
+            <div>
+              <strong class="big" id="evaluationTotal">0 / 90</strong>
+            </div>
+          </div>
+          <div class="rubric-wrap">
+            <table class="rubric">
+              <thead><tr><th>Criterion</th><th>Mark</th><th>Maximum</th></tr></thead>
+              <tbody id="rubricBody"></tbody>
+            </table>
+          </div>
+          <div class="feedback-grid">
+            <article class="feedback-box good"><h3>What you did well</h3><p id="evaluationGood">—</p></article>
+            <article class="feedback-box improve"><h3>What to improve</h3><p id="evaluationImprove">—</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="kicker">CONTINUE LEARNING</p>
+          <h2>Course tools</h2>
+        </div>
+        <div class="quick-links">
+          <a href="course-info.html">Course Information</a>
+          <a href="unit-materials.html">Unit Materials</a>
+          <a href="question-bank.html">Question Bank</a>
+          <a href="revision-helper.html">Revision Helper</a>
+          <a href="practice-mcq.html">Practice MCQs</a>
+          <a href="presentation.html">Presentation</a>
+          <a href="materials-selection.html">Materials Selection</a>
+          <a href="quiz.html">Formal MCQ</a>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span id="institutionName">Department of Mechanical Engineering</span>
+    <span>ME25C08 · Authenticated Student Access</span>
+  </footer>
+</body>
+</html>
