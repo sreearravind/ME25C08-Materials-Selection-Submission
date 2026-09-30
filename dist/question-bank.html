@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ME25C08 centralized question bank and assessment support">
+  <meta name="theme-color" content="#10263f">
+  <title>Question Bank | NE25C08 Course Hub</title>
+  <link rel="stylesheet" href="learning-resources.css">
+  <script src="config.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">QB</div>
+    <div class="brand-copy">
+      <p class="eyebrow" id="courseCode">ME25C08</p>
+      <h1>Central Question Bank</h1>
+      <p>Assessment support · Metallurgy and Materials Science</p>
+    </div>
+    <nav class="top-actions">
+      <a href="index.html">Course Hub</a>
+      <a href="unit-materials.html">Unit Materials</a>
+      <a href="quiz.html">MCQ Test</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero">
+      <div>
+        <p class="kicker">PHASE 2 · CENTRALIZED QUESTION BANK</p>
+        <h2>One place for the question-bank resources currently available.</h2>
+        <p>The repository currently contains a combined student PDF for Units III and IV with AT2 Q&A. Units I, II and V are shown as pending rather than being represented as available when no corresponding question-bank PDF is present.</p>
+      </div>
+      <a class="primary-action" href="unit-materials.html">Browse Unit Materials →</a>
+    </section>
+
+    <section class="qb-grid">
+      <article class="panel">
+        <span class="status available">Available now</span>
+        <p class="mini">UNITS III & IV · AT2 SUPPORT</p>
+        <h3>ME25C08 Units III–IV Question Bank and AT2 Q&A</h3>
+        <p>Current repository resource for Units III and IV. The filename identifies it as the Units III–IV Question Bank and AT2 Q&A student document for September 2026.</p>
+        <div class="coverage">
+          <span class="chip">Unit III</span>
+          <span class="chip">Unit IV</span>
+          <span class="chip">AT2 Q&A</span>
+        </div>
+        <div class="pdf-actions">
+          <a class="open" href="https://raw.githubusercontent.com/sreearravind/ME25C08-Materials-Selection-Submission/main/Files/ME25C08_Units_III_IV_Question_Bank_and_AT2_QA_Student_September_2026.pdf" target="_blank" rel="noopener">Open Question Bank PDF</a>
+          <a class="repo" href="https://github.com/sreearravind/ME25C08-Materials-Selection-Submission/blob/main/Files/ME25C08_Units_III_IV_Question_Bank_and_AT2_QA_Student_September_2026.pdf" target="_blank" rel="noopener">View in GitHub</a>
+        </div>
+      </article>
+
+      <aside class="panel">
+        <h3>Coverage status</h3>
+        <div class="quick-links">
+          <span class="status pending">Unit I · Question bank pending</span>
+          <span class="status pending">Unit II · Question bank pending</span>
+          <span class="status available">Unit III · Available</span>
+          <span class="status available">Unit IV · Available</span>
+          <span class="status pending">Unit V · Question bank pending</span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <p class="kicker">RELATED ASSESSMENT SUPPORT</p>
+        <h2>Move between materials and assessment tools</h2>
+        <p>This page only lists question-bank resources that are actually present in the repository. Other assessment modules remain separate.</p>
+      </div>
+      <div class="resource-grid">
+        <a class="resource-card active" href="unit-iii.html">
+          <p class="mini">UNIT III</p>
+          <h3>Ferrous and Non-Ferrous Metals</h3>
+          <p>Open the Unit III syllabus checklist and student notes.</p>
+          <span class="action">Open Unit III →</span>
+        </a>
+        <a class="resource-card active" href="unit-iv.html">
+          <p class="mini">UNIT IV</p>
+          <h3>Non-Metallic Materials</h3>
+          <p>Open the Unit IV syllabus checklist and student notes.</p>
+          <span class="action">Open Unit IV →</span>
+        </a>
+        <a class="resource-card active" href="quiz.html">
+          <p class="mini">ASSESSMENT MODULE</p>
+          <h3>MCQ Test</h3>
+          <p>Open the existing course MCQ assessment module.</p>
+          <span class="action">Go to MCQ Test →</span>
+        </a>
+        <a class="resource-card active" href="results.html">
+          <p class="mini">FEEDBACK</p>
+          <h3>Evaluation Results</h3>
+          <p>View published activity evaluation and feedback.</p>
+          <span class="action">View Results →</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="note">
+        <strong>Repository status:</strong> when new Unit I, Unit II or Unit V question-bank files are added later, this page can be activated for those units without changing the rest of the course hub structure.
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span id="institutionName">Department of Mechanical Engineering</span>
+    <span>ME25C08 · Central Question Bank</span>
+  </footer>
+  <script>
+    const c=window.SITE_CONFIG||{};
+    document.getElementById("courseCode").textContent=c.courseCode||"ME25C08";
+    document.getElementById("institutionName").textContent=c.institutionName||"Department of Mechanical Engineering";
+  </script>
+</body>
+</html>
