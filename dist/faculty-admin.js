@@ -61,6 +61,7 @@
     document.getElementById("sumResults").textContent=s.evaluationsPublished||0;
     students=Array.isArray(d.students)?d.students:[];
     renderTable();
+    renderMarksTable();
     if(selectedReg){
       const current=students.find(function(x){return x.registrationNumber===selectedReg;});
       if(current) openEditor(current);
@@ -88,12 +89,78 @@
     });
   }
 
+  function renderMarksTable(){
+    const body=document.getElementById("marksTableBody");
+    if(!body)return;
+    body.innerHTML="";
+    students.forEach(function(s){
+      const marks=s.assessmentMarks||{at1:"",at2:"",model:""};
+      const tr=document.createElement("tr");
+      tr.dataset.reg=s.registrationNumber;
+      tr.dataset.search=(s.name+" "+s.registrationNumber).toLowerCase();
+
+      const studentCell=document.createElement("td");
+      const name=document.createElement("span");
+      name.className="student-name";
+      name.textContent=s.name;
+      const meta=document.createElement("span");
+      meta.className="muted";
+      meta.textContent=s.registrationNumber;
+      studentCell.appendChild(name);
+      studentCell.appendChild(document.createElement("br"));
+      studentCell.appendChild(meta);
+      tr.appendChild(studentCell);
+
+      [["at1","AT-1"],["at2","AT-2"],["model","Model Test"]].forEach(function(item){
+        const td=document.createElement("td");
+        const input=document.createElement("input");
+        input.className="mark-input";
+        input.dataset.field=item[0];
+        input.inputMode="decimal";
+        input.maxLength=5;
+        input.setAttribute("aria-label",item[1]+" mark for "+s.name);
+        input.value=marks[item[0]]||"";
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    filterMarksRows();
+  }
+
+  function filterMarksRows(){
+    const input=document.getElementById("marksSearch");
+    const q=input?input.value.trim().toLowerCase():"";
+    document.querySelectorAll("#marksTableBody tr").forEach(function(row){
+      row.hidden=Boolean(q)&&!String(row.dataset.search||"").includes(q);
+    });
+  }
+
+  function validateMark(value,label){
+    const text=String(value||"").trim();
+    if(!text)return "";
+    if(/^(abs|a)$/i.test(text))return "Abs";
+    const number=Number(text);
+    if(!isFinite(number)||number<0||number>100){
+      throw new Error(label+' must be blank, "Abs", or a mark from 0 to 100.');
+    }
+    return String(Math.round(number*100)/100);
+  }
+
+  function showMarksMessage(message){
+    const el=document.getElementById("marksMessage");
+    el.textContent=message;
+    el.hidden=false;
+    window.setTimeout(function(){el.hidden=true;},6000);
+  }
+
   document.getElementById("studentTableBody").addEventListener("click",function(event){
     const button=event.target.closest(".edit-student");if(!button)return;
     const student=students.find(function(s){return s.registrationNumber===button.dataset.reg;});
     if(student)openEditor(student);
   });
   document.getElementById("studentSearch").addEventListener("input",renderTable);
+  document.getElementById("marksSearch").addEventListener("input",filterMarksRows);
 
   function openEditor(student){
     selectedReg=student.registrationNumber;
@@ -110,6 +177,37 @@
     toggle.textContent=student.evaluation&&student.evaluation.published?"Unpublish evaluation":"Publish evaluation";
     editor.scrollIntoView({behavior:"smooth",block:"start"});
   }
+
+  document.getElementById("saveAssessmentMarks").addEventListener("click",async function(){
+    const error=document.getElementById("marksError");
+    clearError(error);
+    document.getElementById("marksMessage").hidden=true;
+    const button=this;
+    button.disabled=true;
+    try{
+      const records=Array.from(document.querySelectorAll("#marksTableBody tr")).map(function(row){
+        const inputs=row.querySelectorAll(".mark-input");
+        const student=students.find(function(s){return s.registrationNumber===row.dataset.reg;});
+        const label=student?student.name:row.dataset.reg;
+        return {
+          registrationNumber:row.dataset.reg,
+          at1:validateMark(inputs[0].value,"AT-1 for "+label),
+          at2:validateMark(inputs[1].value,"AT-2 for "+label),
+          model:validateMark(inputs[2].value,"Model Test for "+label)
+        };
+      });
+      const response=await auth.request("facultySaveAssessmentMarks",{
+        token:token,
+        marksJson:JSON.stringify(records)
+      });
+      showMarksMessage((response.saved||records.length)+" student assessment records saved.");
+      await refreshWithoutViewReset();
+    }catch(e){
+      showError(error,e.message);
+    }finally{
+      button.disabled=false;
+    }
+  });
 
   document.getElementById("newStudent").addEventListener("click",function(){
     selectedReg="";editor.hidden=false;clearError(editorError);document.getElementById("pinOutput").hidden=true;

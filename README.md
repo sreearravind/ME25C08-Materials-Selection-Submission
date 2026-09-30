@@ -309,6 +309,7 @@ Authenticated faculty access:
 - presentation team-number assignment for the private Student Dashboard
 - student PIN reset
 - evaluation publish/unpublish control
+- **Internal Assessment Marks**: AT-1, AT-2 and Model Test
 - faculty password change
 
 ### Authentication design
@@ -371,6 +372,21 @@ Files:
 The dashboard displays only data associated with the authenticated registration number.
 
 ### Faculty Administration
+
+### Internal Assessment Marks
+
+Faculty Administration now contains a private **Internal Assessment Marks** table.
+
+- AT-1 is populated from the faculty-provided Internal Assessment Test-I statement.
+- AT-2 and Model Test columns are reserved for later entry.
+- accepted values: 0–100, blank, or `Abs`
+- marks can be searched and edited only after faculty authentication
+- marks are **not returned to the Student Dashboard**
+- assessment marks are stored in a separate private Google Sheet named:
+  `ME25C08 – Internal Assessment Marks (Private)`
+
+The backend locates this private spreadsheet by name on first use and stores its ID in Script Properties as `INTERNAL_MARKS_SPREADSHEET_ID`.
+
 
 Files:
 - `dist/faculty-admin.html`
