@@ -61,15 +61,19 @@
     questionUnit.textContent="UNIT "+q.unit+" · "+(data.units[q.unit]?data.units[q.unit].co:"");
     questionText.textContent=q.q;
     optionList.innerHTML="";
-    q.options.forEach(function(optionText,optionIndex){
+    const displayOptions=shuffled(q.options.map(function(text,originalIndex){
+      return {text:text,originalIndex:originalIndex};
+    }));
+    displayOptions.forEach(function(item){
       const label=document.createElement("label");
       label.className="option";
+      label.dataset.originalIndex=String(item.originalIndex);
       const radio=document.createElement("input");
-      radio.type="radio";radio.name="practiceAnswer";radio.value=String(optionIndex);
-      const span=document.createElement("span");span.textContent=optionText;
+      radio.type="radio";radio.name="practiceAnswer";radio.value=String(item.originalIndex);
+      const span=document.createElement("span");span.textContent=item.text;
       label.appendChild(radio);label.appendChild(span);
       label.addEventListener("click",function(){
-        if(!answered) chooseAnswer(optionIndex);
+        if(!answered) chooseAnswer(item.originalIndex);
       });
       optionList.appendChild(label);
     });
@@ -82,11 +86,12 @@
     const correct=selected===q.answer;
     if(correct)score++;
     const options=Array.from(optionList.children);
-    options.forEach(function(el,i){
+    options.forEach(function(el){
+      const originalIndex=Number(el.dataset.originalIndex);
       const radio=el.querySelector("input");
       radio.disabled=true;
-      if(i===q.answer)el.classList.add("correct");
-      if(i===selected&&i!==q.answer)el.classList.add("incorrect");
+      if(originalIndex===q.answer)el.classList.add("correct");
+      if(originalIndex===selected&&originalIndex!==q.answer)el.classList.add("incorrect");
     });
     records.push({q:q,selected:selected,correct:correct});
     feedback.hidden=false;
