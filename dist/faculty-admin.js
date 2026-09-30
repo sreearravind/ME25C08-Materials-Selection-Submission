@@ -61,6 +61,7 @@
     document.getElementById("sumResults").textContent=s.evaluationsPublished||0;
     students=Array.isArray(d.students)?d.students:[];
     renderTable();
+    renderMarksTable();
     if(selectedReg){
       const current=students.find(function(x){return x.registrationNumber===selectedReg;});
       if(current) openEditor(current);
