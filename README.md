@@ -126,6 +126,11 @@ The course hub is intended to provide the digital layer for these course activit
 ### Academic foundation
 - **Course Information** – course overview, objectives, COs, CO–PO/PSO mapping, syllabus, assessment structure, books and NPTEL links
 
+### Learning resources
+- **Unit-wise Course Materials** – dedicated Unit I–IV pages with syllabus scope, CO connection, study checklist and direct access to the uploaded student-note PDFs
+- **Central Question Bank** – current repository question-bank coverage with the Units III–IV Question Bank and AT2 Q&A resource activated
+- **Unit V** – structure reserved; student material is not yet present in the repository
+
 ### Learning activities
 - **AI-Assisted Materials Selection** – individual report submission with AI-use, verification and reflection record
 - **Student Technical Presentation** – 11 presentation topics with team allocation and team file submission
@@ -134,9 +139,7 @@ The course hub is intended to provide the digital layer for these course activit
 - **MCQ Test** – existing assessment module
 - **Evaluation Results** – published activity evaluation and feedback
 
-### Planned learning-resource modules
-- **Unit-wise Course Materials**
-- **Central Question Bank**
+### Planned modules
 - **Revision Helper**
 - **Student / Faculty access layer**
 
@@ -170,6 +173,43 @@ The handout remains the academic source of truth. Portal content should not sile
 
 ---
 
+## Phase 2 – Learning resources
+
+Phase 2 activates the learning-resource layer using only files currently present in the repository.
+
+### Implemented
+
+- Unit Materials landing page
+- Dedicated **Unit I** page linked to the uploaded Unit I student notes
+- Dedicated **Unit II** page linked to the uploaded Unit II student notes
+- Dedicated **Unit III** page linked to the uploaded Unit III student notes
+- Dedicated **Unit IV** page linked to the uploaded Unit IV student notes
+- **Unit V** shown as pending until a Unit V student-material PDF is uploaded
+- Unit pages include:
+  - official syllabus scope from the course handout
+  - corresponding CO
+  - topic checklist based on the detailed academic calendar
+  - direct PDF access
+  - links to Question Bank and MCQ assessment
+- Central Question Bank page
+- Current Units III–IV Question Bank / AT2 Q&A activated
+- Unit-wise question-bank coverage status displayed without implying unavailable files exist
+- Course Hub cards for Unit Materials and Question Bank activated
+
+### Current question-bank coverage
+
+| Unit | Repository question-bank status |
+|---|---|
+| Unit I | Pending |
+| Unit II | Pending |
+| Unit III | Available in combined Units III–IV PDF |
+| Unit IV | Available in combined Units III–IV PDF |
+| Unit V | Pending |
+
+The Phase 2 portal does not generate or infer missing question-bank content. New unit-specific resources can be activated when the corresponding files are added to `Files/`.
+
+---
+
 ## Files currently available in the repository
 
 ```text
@@ -182,9 +222,9 @@ Files/
   ME25C08_Units_III_IV_Question_Bank_and_AT2_QA_Student_September_2026.pdf
 ```
 
-The Unit I–IV filenames currently use `ME25CO8` in several filenames (letter O before 8). They can be standardised to `ME25C08` during the learning-resource phase before permanent portal links are finalised.
+The Unit I–IV filenames currently use `ME25CO8` in several filenames (letter O before 8). Phase 2 preserves those existing repository filenames so no source PDF is silently replaced. The student-facing pages use the correct official course code **ME25C08** in their visible content.
 
-The GitHub Pages workflow currently publishes the `dist/` directory only. Files stored under `Files/` can still be linked through their GitHub/raw URLs; Phase 2 will organise those resources into student-facing Unit pages.
+The GitHub Pages workflow publishes the `dist/` directory. The Phase 2 pages link the existing PDFs in `Files/` through their GitHub/raw URLs.
 
 ---
 
@@ -196,6 +236,13 @@ dist/
   hub.css
   course-info.html           Phase 1 academic foundation
   course-info.css
+  unit-materials.html         Phase 2 unit resource centre
+  unit-i.html                 Unit I learning page
+  unit-ii.html                Unit II learning page
+  unit-iii.html               Unit III learning page
+  unit-iv.html                Unit IV learning page
+  question-bank.html          Central Question Bank
+  learning-resources.css      Shared Phase 2 styles
   materials-selection.html   AI-assisted individual activity
   app.js
   styles.css
@@ -284,10 +331,10 @@ https://github.com/sreearravind/ME25C08-Materials-Selection-Submission
 ## Development roadmap
 
 ### Phase 1 – Academic foundation
-Course Information, syllabus, CO/PO/PSO, references/NPTEL and README. **Implemented in this phase.**
+Course Information, syllabus, CO/PO/PSO, references/NPTEL and README. **Implemented.**
 
 ### Phase 2 – Learning resources
-Activate Unit I–IV materials, add Unit V when available, standardise filenames and build the central Question Bank.
+Unit I–IV resource pages and the centralized Question Bank are **implemented**. Unit V and missing unit-wise question-bank resources remain pending until files are uploaded.
 
 ### Phase 3 – Revision support
 Assessment-Test revision helper, syllabus-aware practice, topic checklists and revision MCQs.
