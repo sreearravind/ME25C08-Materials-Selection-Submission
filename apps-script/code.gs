@@ -24,6 +24,8 @@ const AUTH_SESSIONS_SHEET = 'Auth Sessions';
 const STUDENT_RESULTS_SHEET = 'Student Results';
 const INITIAL_PINS_SHEET = 'Initial Student PINs';
 const INTERNAL_MARKS_SHEET = 'Internal Assessment Marks';
+const INTERNAL_MARKS_SPREADSHEET_PROPERTY = 'INTERNAL_MARKS_SPREADSHEET_ID';
+const INTERNAL_MARKS_FILE_NAME = 'ME25C08 – Internal Assessment Marks (Private)';
 const STUDENT_SESSION_HOURS = 8;
 const FACULTY_SESSION_HOURS = 2;
 const LEGACY_PERSONALISATION_COMMIT = 'e32fa1ede81527b13c40bc0f9d48adb351b97360';
@@ -563,9 +565,6 @@ function ensurePersonalisationSheets_(spreadsheet) {
   ensureSheet_(spreadsheet, INITIAL_PINS_SHEET, [
     'Registration number', 'Student name', 'Temporary PIN', 'Generated'
   ]);
-  ensureSheet_(spreadsheet, INTERNAL_MARKS_SHEET, [
-    'Registration number', 'Student name', 'AT-1', 'AT-2', 'Model Test', 'Updated'
-  ]);
 }
 
 function bootstrapStudentRoster_(spreadsheet) {
@@ -868,7 +867,8 @@ function facultySaveAssessmentMarks_(p) {
   }
 
   const access = spreadsheet.getSheetByName(STUDENT_ACCESS_SHEET);
-  const marksSheet = ensureSheet_(spreadsheet, INTERNAL_MARKS_SHEET, [
+  const marksSpreadsheet = internalMarksSpreadsheet_();
+  const marksSheet = ensureSheet_(marksSpreadsheet, INTERNAL_MARKS_SHEET, [
     'Registration number', 'Student name', 'AT-1', 'AT-2', 'Model Test', 'Updated'
   ]);
   const now = new Date();
@@ -907,8 +907,35 @@ function normaliseAssessmentMark_(value, label) {
   return Math.round(number * 100) / 100;
 }
 
-function assessmentMarksMap_(spreadsheet) {
+function internalMarksSpreadsheet_() {
+  const props = PropertiesService.getScriptProperties();
+  const existingId = props.getProperty(INTERNAL_MARKS_SPREADSHEET_PROPERTY);
+  if (existingId) {
+    try {
+      return SpreadsheetApp.openById(existingId);
+    } catch (_) {}
+  }
+
+  const files = DriveApp.getFilesByName(INTERNAL_MARKS_FILE_NAME);
+  let spreadsheet;
+  if (files.hasNext()) {
+    spreadsheet = SpreadsheetApp.openById(files.next().getId());
+  } else {
+    spreadsheet = SpreadsheetApp.create(INTERNAL_MARKS_FILE_NAME);
+    const first = spreadsheet.getSheets()[0];
+    first.setName(INTERNAL_MARKS_SHEET);
+    first.appendRow(['Registration number', 'Student name', 'AT-1', 'AT-2', 'Model Test', 'Updated']);
+    first.setFrozenRows(1);
+    first.getRange(1, 1, 1, 6).setFontWeight('bold').setBackground('#10263f').setFontColor('#ffffff');
+    first.autoResizeColumns(1, 6);
+  }
+  props.setProperty(INTERNAL_MARKS_SPREADSHEET_PROPERTY, spreadsheet.getId());
+  return spreadsheet;
+}
+
+function assessmentMarksMap_() {
   const map = {};
+  const spreadsheet = internalMarksSpreadsheet_();
   const sheet = spreadsheet.getSheetByName(INTERNAL_MARKS_SHEET);
   if (!sheet || sheet.getLastRow() < 2) return map;
   sheet.getRange(2, 1, sheet.getLastRow() - 1, 6).getValues().forEach(function(r) {
@@ -932,7 +959,7 @@ function buildFacultyDashboard_(spreadsheet) {
   const quizMap = quizSummaryMap_(spreadsheet);
   const presentationMap = presentationSummaryMap_(spreadsheet);
   const resultMap = resultSummaryMap_(spreadsheet);
-  const marksMap = assessmentMarksMap_(spreadsheet);
+  const marksMap = assessmentMarksMap_();
 
   const students = rows.map(function(r) {
     const reg = String(r[0]).toUpperCase();
