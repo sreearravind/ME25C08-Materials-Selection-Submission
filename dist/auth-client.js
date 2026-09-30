@@ -21,10 +21,18 @@
       }
       function onMessage(event){
         const allowed=event.origin==="null"||event.origin==="https://script.google.com"||event.origin.endsWith(".googleusercontent.com");
-        if(event.source!==iframe.contentWindow||!allowed||!event.data||event.data.requestId!==requestId)return;
+        if(event.source!==iframe.contentWindow||!allowed||!event.data)return;
+        const hasMatchingRequestId=event.data.requestId===requestId;
+        const isLegacyBackendResponse=!event.data.requestId && typeof event.data.ok==="boolean";
+        if(!hasMatchingRequestId&&!isLegacyBackendResponse)return;
         cleanup();
         if(event.data.ok)resolve(event.data);
-        else reject(new Error(event.data.message||"The request could not be completed."));
+        else {
+          const legacyHint=isLegacyBackendResponse
+            ? " The deployed Apps Script may still be an older version or a different deployment URL."
+            : "";
+          reject(new Error((event.data.message||"The request could not be completed.")+legacyHint));
+        }
       }
       window.addEventListener("message",onMessage);
       timer=window.setTimeout(function(){cleanup();reject(new Error("No response was received. Check the connection and try again."));},timeoutMs||45000);
