@@ -1303,7 +1303,10 @@ function responsePage_(result) {
   response.message = result && result.message ? String(result.message) : '';
   const json = JSON.stringify(response).replace(/</g, '\\u003c');
   const html = '<!doctype html><html><body><script>' +
-    'window.parent.postMessage(' + json + ', "*");' +
+    '(function(){var m=' + json + ';' +
+    'try{window.parent.postMessage(m,"*");}catch(e){}' +
+    'try{if(window.top&&window.top!==window.parent)window.top.postMessage(m,"*");}catch(e){}' +
+    '})();' +
     '<\/script></body></html>';
   return HtmlService.createHtmlOutput(html).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
