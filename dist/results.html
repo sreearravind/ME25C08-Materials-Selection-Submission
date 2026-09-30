@@ -3,35 +3,38 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Provisional rubric feedback for the ME25C08 AI-assisted materials selection activity">
+  <meta name="description" content="ME25C08 secure evaluation access">
   <meta name="theme-color" content="#10263f">
-  <title>ME25C08 · Evaluation Results</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="results.css">
-  <script src="results.js" defer></script>
+  <title>Secure Results | NE25C08 Course Hub</title>
+  <link rel="stylesheet" href="auth.css">
+  <script src="config.js"></script>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand-mark" aria-hidden="true">M</div>
-    <div><p class="eyebrow">ME25C08</p><h1>Materials Selection Evaluation</h1></div>
-    <a class="top-link" href="index.html">Submission portal</a>
+    <div class="brand-mark">R</div>
+    <div class="brand-copy">
+      <p class="eyebrow">ME25C08</p>
+      <h1>Evaluation Results</h1>
+      <p>Results have moved to authenticated student access</p>
+    </div>
+    <nav class="top-actions"><a href="index.html">Course Hub</a></nav>
   </header>
-  <main class="results-main">
-    <aside class="results-nav" aria-label="Student results">
-      <p class="section-number">PROVISIONAL RESULTS</p>
-      <h2>Select your name</h2>
-      <p>Marks shown are for the written submission only.</p>
-      <label>Search by name or registration number
-        <input id="studentSearch" type="search" autocomplete="off" placeholder="Start typing…">
-      </label>
-      <div id="studentList" class="student-list"></div>
-      <p id="noMatch" hidden>No matching evaluated submission.</p>
-    </aside>
-    <section class="results-content" aria-live="polite">
-      <div id="emptyState" class="empty-state"><h2>Choose a student to view feedback</h2><p>Each result includes the rubric breakdown and two focused comments.</p></div>
-      <article id="resultPanel" class="result-panel" hidden></article>
+  <main class="page-shell">
+    <section class="auth-shell">
+      <div class="auth-card">
+        <p class="kicker">PRIVATE STUDENT FEEDBACK</p>
+        <h2>Individual results are no longer displayed publicly.</h2>
+        <p>Your Materials Selection evaluation, submission status and formal MCQ result are available through the authenticated Student Dashboard using your registration number and PIN.</p>
+        <div class="notice">
+          This change protects student-specific marks and feedback while keeping course materials, revision tools and public learning resources openly accessible.
+        </div>
+        <div class="button-row">
+          <a class="button-link" href="student-access.html">Open Student Dashboard</a>
+          <a class="button-link secondary" href="index.html">Back to Course Hub</a>
+        </div>
+      </div>
     </section>
   </main>
-  <footer><span>Department of Mechanical Engineering</span><span>Latest submission evaluated · Oral defence pending</span></footer>
+  <footer><span>Department of Mechanical Engineering</span><span>ME25C08 · Secure Results Access</span></footer>
 </body>
 </html>
