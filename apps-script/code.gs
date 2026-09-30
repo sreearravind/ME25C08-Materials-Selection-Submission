@@ -19,6 +19,13 @@ const QUIZ_LIVE_SHEET = 'Quiz Live';
 const QUIZ_RESULTS_SHEET = 'Quiz Results';
 const QUIZ_EVENTS_SHEET = 'Quiz Events';
 const MONITOR_PAGE_URL = 'https://sreearravind.github.io/ME25C08-Materials-Selection-Submission/monitor.html';
+const STUDENT_ACCESS_SHEET = 'Student Access';
+const AUTH_SESSIONS_SHEET = 'Auth Sessions';
+const STUDENT_RESULTS_SHEET = 'Student Results';
+const INITIAL_PINS_SHEET = 'Initial Student PINs';
+const STUDENT_SESSION_HOURS = 8;
+const FACULTY_SESSION_HOURS = 2;
+const LEGACY_PERSONALISATION_COMMIT = 'e32fa1ede81527b13c40bc0f9d48adb351b97360';
 
 function setupProject() {
   if (INITIAL_CLASS_CODE === 'CHANGE-THIS-CLASS-CODE') {
@@ -68,23 +75,49 @@ function doGet(e) {
 
 function doPost(e) {
   let result;
+  const p = e && e.parameter ? e.parameter : {};
+  const action = String(p.action || '');
   try {
-    const p = e && e.parameter ? e.parameter : {};
-    if (p.action === 'quizEvent') {
+    if (action === 'quizEvent') {
       saveQuizEvent_(p);
       result = { ok: true };
-    } else if (p.action === 'quizResult') {
+    } else if (action === 'quizResult') {
       saveQuizResult_(p);
       result = { ok: true };
-    } else if (p.action === 'presentationSubmission') {
+    } else if (action === 'presentationSubmission') {
       result = savePresentationSubmission_(p);
+    } else if (action === 'studentLogin') {
+      result = studentLogin_(p);
+    } else if (action === 'facultyLogin') {
+      result = facultyLogin_(p);
+    } else if (action === 'studentDashboard') {
+      result = studentDashboard_(p);
+    } else if (action === 'facultyDashboard') {
+      result = facultyDashboard_(p);
+    } else if (action === 'changeStudentPin') {
+      result = changeStudentPin_(p);
+    } else if (action === 'logoutSession') {
+      result = logoutSession_(p);
+    } else if (action === 'facultySaveStudent') {
+      result = facultySaveStudent_(p);
+    } else if (action === 'facultyResetStudentPin') {
+      result = facultyResetStudentPin_(p);
+    } else if (action === 'facultyToggleResult') {
+      result = facultyToggleResult_(p);
+    } else if (action === 'facultyChangePassword') {
+      result = facultyChangePassword_(p);
     } else {
       result = saveSubmission_(p);
     }
   } catch (error) {
     console.error(error && error.stack ? error.stack : error);
-    result = { ok: false, message: safeErrorMessage_(error) };
+    result = {
+      responseType: action ? action + '-result' : 'materials-submission-result',
+      ok: false,
+      message: safeErrorMessage_(error)
+    };
   }
+  result.requestId = String(p.requestId || '').slice(0, 100);
   return responsePage_(result);
 }
 
@@ -426,6 +459,710 @@ function validPresentationSignature_(bytes, extension) {
 }
 
 
+
+
+function setupPersonalisation() {
+  const props = PropertiesService.getScriptProperties();
+  const spreadsheetId = props.getProperty('SPREADSHEET_ID');
+  if (!spreadsheetId) throw new Error('Run setupProject() first.');
+
+  const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  ensurePersonalisationSheets_(spreadsheet);
+
+  if (!props.getProperty('AUTH_PEPPER')) {
+    props.setProperty('AUTH_PEPPER', randomToken_());
+  }
+
+  let facultyTemporaryPassword = '';
+  if (!props.getProperty('FACULTY_PASSWORD_HASH') || !props.getProperty('FACULTY_PASSWORD_SALT')) {
+    facultyTemporaryPassword = generateFacultyPassword_();
+    setFacultyPassword_(facultyTemporaryPassword);
+  }
+
+  const rosterResult = bootstrapStudentRoster_(spreadsheet);
+  const resultImport = importLegacyEvaluations_(spreadsheet);
+  cleanupExpiredSessions_(spreadsheet);
+
+  Logger.log('Personalisation spreadsheet: ' + spreadsheet.getUrl());
+  Logger.log('Student access rows added: ' + rosterResult.added);
+  Logger.log('Legacy evaluations imported: ' + resultImport.added);
+  Logger.log('Temporary student PINs are in the "' + INITIAL_PINS_SHEET + '" sheet. Delete that sheet after securely distributing the PINs.');
+  if (facultyTemporaryPassword) {
+    Logger.log('TEMPORARY FACULTY PASSWORD (save this now): ' + facultyTemporaryPassword);
+  } else {
+    Logger.log('Faculty password already exists. Run resetFacultyPassword() from the Apps Script editor if it needs to be replaced.');
+  }
+
+  return {
+    spreadsheetUrl: spreadsheet.getUrl(),
+    studentRowsAdded: rosterResult.added,
+    resultsImported: resultImport.added,
+    facultyPasswordGenerated: Boolean(facultyTemporaryPassword)
+  };
+}
+
+function resetFacultyPassword() {
+  const props = PropertiesService.getScriptProperties();
+  if (!props.getProperty('SPREADSHEET_ID')) throw new Error('Run setupProject() first.');
+  if (!props.getProperty('AUTH_PEPPER')) props.setProperty('AUTH_PEPPER', randomToken_());
+  const password = generateFacultyPassword_();
+  setFacultyPassword_(password);
+  const spreadsheet = SpreadsheetApp.openById(props.getProperty('SPREADSHEET_ID'));
+  ensurePersonalisationSheets_(spreadsheet);
+  removeSessionsForRole_(spreadsheet, 'faculty');
+  Logger.log('NEW TEMPORARY FACULTY PASSWORD (save this now): ' + password);
+  return { reset: true };
+}
+
+function ensurePersonalisationSheets_(spreadsheet) {
+  ensureSheet_(spreadsheet, STUDENT_ACCESS_SHEET, [
+    'Registration number', 'Student name', 'Assigned application', 'Team number',
+    'PIN salt', 'PIN hash', 'Must change PIN', 'Active', 'Created', 'Updated'
+  ]);
+  ensureSheet_(spreadsheet, AUTH_SESSIONS_SHEET, [
+    'Token hash', 'Role', 'Registration number', 'Created', 'Expires', 'Last seen'
+  ]);
+  ensureSheet_(spreadsheet, STUDENT_RESULTS_SHEET, [
+    'Registration number', 'Student name', 'Application', 'Scores JSON', 'Written total',
+    'What went well', 'What to improve', 'Updated', 'Published'
+  ]);
+  ensureSheet_(spreadsheet, INITIAL_PINS_SHEET, [
+    'Registration number', 'Student name', 'Temporary PIN', 'Generated'
+  ]);
+}
+
+function bootstrapStudentRoster_(spreadsheet) {
+  const access = spreadsheet.getSheetByName(STUDENT_ACCESS_SHEET);
+  const pins = spreadsheet.getSheetByName(INITIAL_PINS_SHEET);
+  const existing = {};
+  if (access.getLastRow() > 1) {
+    access.getRange(2, 1, access.getLastRow() - 1, 1).getDisplayValues().forEach(function(row) {
+      existing[String(row[0]).toUpperCase()] = true;
+    });
+  }
+
+  const url = 'https://raw.githubusercontent.com/sreearravind/ME25C08-Materials-Selection-Submission/' +
+    LEGACY_PERSONALISATION_COMMIT + '/dist/app.js';
+  const source = UrlFetchApp.fetch(url).getContentText();
+  const match = source.match(/const studentAssignments = (\[[\s\S]*?\n\s*\]);/);
+  if (!match) throw new Error('Could not read the legacy student roster for personalisation setup.');
+  const roster = JSON.parse(match[1]);
+  let added = 0;
+  const now = new Date();
+
+  roster.forEach(function(student) {
+    const reg = String(student.roll || '').trim().toUpperCase();
+    if (!reg || existing[reg]) return;
+    const pin = generateStudentPin_();
+    const salt = randomToken_().slice(0, 24);
+    access.appendRow([
+      sheetSafe_(reg),
+      sheetSafe_(String(student.name || '').trim()),
+      sheetSafe_(String(student.application || '').replace(/^Select a material for /i, '').trim()),
+      '',
+      salt,
+      hashSecret_(pin, salt),
+      'true',
+      'true',
+      now,
+      now
+    ]);
+    pins.appendRow([sheetSafe_(reg), sheetSafe_(String(student.name || '').trim()), pin, now]);
+    existing[reg] = true;
+    added++;
+  });
+  return { added: added };
+}
+
+function importLegacyEvaluations_(spreadsheet) {
+  const results = spreadsheet.getSheetByName(STUDENT_RESULTS_SHEET);
+  const existing = {};
+  if (results.getLastRow() > 1) {
+    results.getRange(2, 1, results.getLastRow() - 1, 1).getDisplayValues().forEach(function(row) {
+      existing[String(row[0]).toUpperCase()] = true;
+    });
+  }
+
+  const url = 'https://raw.githubusercontent.com/sreearravind/ME25C08-Materials-Selection-Submission/' +
+    LEGACY_PERSONALISATION_COMMIT + '/dist/results.js';
+  const source = UrlFetchApp.fetch(url).getContentText();
+  const match = source.match(/const evaluations = (\[[\s\S]*?\n\]);\n\nconst criteria =/);
+  if (!match) throw new Error('Could not read the legacy evaluation data for secure migration.');
+
+  // The source is an immutable, repository-owned commit used only for one-time migration.
+  const evaluations = eval('(' + match[1] + ')');
+  let added = 0;
+  const now = new Date();
+  evaluations.forEach(function(item) {
+    const reg = String(item.reg || '').trim().toUpperCase();
+    if (!reg || existing[reg]) return;
+    const scores = Array.isArray(item.scores) ? item.scores.map(function(v) { return Number(v) || 0; }) : [];
+    const total = scores.reduce(function(sum, value) { return sum + value; }, 0);
+    results.appendRow([
+      sheetSafe_(reg),
+      sheetSafe_(String(item.name || '').trim()),
+      sheetSafe_(String(item.application || '').trim()),
+      JSON.stringify(scores),
+      total,
+      sheetSafe_(String(item.good || '').trim()),
+      sheetSafe_(String(item.improve || '').trim()),
+      now,
+      'true'
+    ]);
+    existing[reg] = true;
+    added++;
+  });
+  return { added: added };
+}
+
+function studentLogin_(p) {
+  const reg = normaliseRegNo_(p.registrationNumber);
+  const pin = required_(p.pin, 'PIN', 64);
+  rateLimitCheck_('student:' + reg);
+
+  const spreadsheet = personalisationSpreadsheet_();
+  const student = findStudentAccess_(spreadsheet, reg);
+  if (!student || !student.active || hashSecret_(pin, student.pinSalt) !== student.pinHash) {
+    rateLimitFail_('student:' + reg);
+    Utilities.sleep(250);
+    throw new Error('Registration number or PIN is incorrect.');
+  }
+  rateLimitClear_('student:' + reg);
+  const session = createAuthSession_(spreadsheet, 'student', reg, STUDENT_SESSION_HOURS);
+  return {
+    responseType: 'studentLogin-result',
+    ok: true,
+    token: session.token,
+    expiresAt: session.expiresAt,
+    mustChangePin: student.mustChangePin,
+    student: { registrationNumber: student.reg, name: student.name }
+  };
+}
+
+function facultyLogin_(p) {
+  const password = required_(p.password, 'Faculty password', 128);
+  rateLimitCheck_('faculty');
+  const props = PropertiesService.getScriptProperties();
+  const salt = props.getProperty('FACULTY_PASSWORD_SALT');
+  const expected = props.getProperty('FACULTY_PASSWORD_HASH');
+  if (!salt || !expected || hashSecret_(password, salt) !== expected) {
+    rateLimitFail_('faculty');
+    Utilities.sleep(300);
+    throw new Error('Faculty password is incorrect.');
+  }
+  rateLimitClear_('faculty');
+  const spreadsheet = personalisationSpreadsheet_();
+  const session = createAuthSession_(spreadsheet, 'faculty', '', FACULTY_SESSION_HOURS);
+  return {
+    responseType: 'facultyLogin-result',
+    ok: true,
+    token: session.token,
+    expiresAt: session.expiresAt
+  };
+}
+
+function studentDashboard_(p) {
+  const spreadsheet = personalisationSpreadsheet_();
+  const session = validateSession_(spreadsheet, required_(p.token, 'Session token', 200), 'student');
+  const student = findStudentAccess_(spreadsheet, session.reg);
+  if (!student || !student.active) throw new Error('Student access is inactive.');
+
+  return {
+    responseType: 'studentDashboard-result',
+    ok: true,
+    expiresAt: session.expiresAt,
+    dashboard: buildStudentDashboard_(spreadsheet, student)
+  };
+}
+
+function facultyDashboard_(p) {
+  const spreadsheet = personalisationSpreadsheet_();
+  validateSession_(spreadsheet, required_(p.token, 'Session token', 200), 'faculty');
+  return {
+    responseType: 'facultyDashboard-result',
+    ok: true,
+    dashboard: buildFacultyDashboard_(spreadsheet)
+  };
+}
+
+function changeStudentPin_(p) {
+  const spreadsheet = personalisationSpreadsheet_();
+  const session = validateSession_(spreadsheet, required_(p.token, 'Session token', 200), 'student');
+  const newPin = validateNewPin_(p.newPin);
+  const access = spreadsheet.getSheetByName(STUDENT_ACCESS_SHEET);
+  const row = findRowByValue_(access, 1, session.reg);
+  if (!row) throw new Error('Student access record was not found.');
+  const salt = randomToken_().slice(0, 24);
+  access.getRange(row, 5, 1, 6).setValues([[
+    salt, hashSecret_(newPin, salt), 'false',
+    access.getRange(row, 8).getDisplayValue() || 'true',
+    access.getRange(row, 9).getValue() || new Date(),
+    new Date()
+  ]]);
+  return { responseType: 'changeStudentPin-result', ok: true };
+}
+
+function logoutSession_(p) {
+  const spreadsheet = personalisationSpreadsheet_();
+  const token = required_(p.token, 'Session token', 200);
+  const hash = hashSessionToken_(token);
+  const sheet = spreadsheet.getSheetByName(AUTH_SESSIONS_SHEET);
+  const row = findRowByValue_(sheet, 1, hash);
+  if (row) sheet.deleteRow(row);
+  return { responseType: 'logoutSession-result', ok: true };
+}
+
+function facultySaveStudent_(p) {
+  const spreadsheet = personalisationSpreadsheet_();
+  validateSession_(spreadsheet, required_(p.token, 'Session token', 200), 'faculty');
+
+  const reg = normaliseRegNo_(p.registrationNumber);
+  const name = required_(p.studentName, 'Student name', 100);
+  const application = String(p.application || '').trim().slice(0, 300);
+  const team = String(p.teamNumber || '').trim();
+  if (team && !/^(0[1-9]|1[01])$/.test(team)) throw new Error('Team number must be 01 to 11.');
+  const active = String(p.active) !== 'false';
+
+  const sheet = spreadsheet.getSheetByName(STUDENT_ACCESS_SHEET);
+  let row = findRowByValue_(sheet, 1, reg);
+  let temporaryPin = '';
+  const now = new Date();
+
+  if (!row) {
+    temporaryPin = generateStudentPin_();
+    const salt = randomToken_().slice(0, 24);
+    sheet.appendRow([
+      sheetSafe_(reg), sheetSafe_(name), sheetSafe_(application), sheetSafe_(team),
+      salt, hashSecret_(temporaryPin, salt), 'true', active ? 'true' : 'false', now, now
+    ]);
+    spreadsheet.getSheetByName(INITIAL_PINS_SHEET)
+      .appendRow([sheetSafe_(reg), sheetSafe_(name), temporaryPin, now]);
+  } else {
+    sheet.getRange(row, 1, 1, 4).setValues([[sheetSafe_(reg), sheetSafe_(name), sheetSafe_(application), sheetSafe_(team)]]);
+    sheet.getRange(row, 8).setValue(active ? 'true' : 'false');
+    sheet.getRange(row, 10).setValue(now);
+  }
+
+  return {
+    responseType: 'facultySaveStudent-result',
+    ok: true,
+    temporaryPin: temporaryPin
+  };
+}
+
+function facultyResetStudentPin_(p) {
+  const spreadsheet = personalisationSpreadsheet_();
+  validateSession_(spreadsheet, required_(p.token, 'Session token', 200), 'faculty');
+  const reg = normaliseRegNo_(p.registrationNumber);
+  const access = spreadsheet.getSheetByName(STUDENT_ACCESS_SHEET);
+  const row = findRowByValue_(access, 1, reg);
+  if (!row) throw new Error('Student was not found.');
+
+  const pin = generateStudentPin_();
+  const salt = randomToken_().slice(0, 24);
+  access.getRange(row, 5).setValue(salt);
+  access.getRange(row, 6).setValue(hashSecret_(pin, salt));
+  access.getRange(row, 7).setValue('true');
+  access.getRange(row, 10).setValue(new Date());
+  removeSessionsForRegistration_(spreadsheet, reg);
+
+  return {
+    responseType: 'facultyResetStudentPin-result',
+    ok: true,
+    registrationNumber: reg,
+    temporaryPin: pin
+  };
+}
+
+function facultyToggleResult_(p) {
+  const spreadsheet = personalisationSpreadsheet_();
+  validateSession_(spreadsheet, required_(p.token, 'Session token', 200), 'faculty');
+  const reg = normaliseRegNo_(p.registrationNumber);
+  const sheet = spreadsheet.getSheetByName(STUDENT_RESULTS_SHEET);
+  const row = findRowByValue_(sheet, 1, reg);
+  if (!row) throw new Error('No migrated evaluation is available for this student.');
+  const published = String(p.published) === 'true';
+  sheet.getRange(row, 9).setValue(published ? 'true' : 'false');
+  sheet.getRange(row, 8).setValue(new Date());
+  return { responseType: 'facultyToggleResult-result', ok: true, published: published };
+}
+
+function facultyChangePassword_(p) {
+  const spreadsheet = personalisationSpreadsheet_();
+  validateSession_(spreadsheet, required_(p.token, 'Session token', 200), 'faculty');
+  const password = String(p.newPassword || '');
+  if (password.length < 10 || password.length > 128) {
+    throw new Error('Faculty password must contain at least 10 characters.');
+  }
+  setFacultyPassword_(password);
+  removeSessionsForRole_(spreadsheet, 'faculty');
+  return { responseType: 'facultyChangePassword-result', ok: true, loginAgain: true };
+}
+
+function buildStudentDashboard_(spreadsheet, student) {
+  const result = {
+    profile: {
+      registrationNumber: student.reg,
+      name: student.name,
+      application: student.application,
+      teamNumber: student.team,
+      mustChangePin: student.mustChangePin
+    },
+    materials: latestMaterialsSubmission_(spreadsheet, student.reg),
+    quiz: latestQuizResult_(spreadsheet, student.reg),
+    presentation: latestPresentationSubmission_(spreadsheet, student.team),
+    evaluation: secureEvaluation_(spreadsheet, student.reg)
+  };
+  return result;
+}
+
+function buildFacultyDashboard_(spreadsheet) {
+  const access = spreadsheet.getSheetByName(STUDENT_ACCESS_SHEET);
+  const rows = access.getLastRow() > 1
+    ? access.getRange(2, 1, access.getLastRow() - 1, 10).getValues() : [];
+  const materialsMap = materialsSummaryMap_(spreadsheet);
+  const quizMap = quizSummaryMap_(spreadsheet);
+  const presentationMap = presentationSummaryMap_(spreadsheet);
+  const resultMap = resultSummaryMap_(spreadsheet);
+
+  const students = rows.map(function(r) {
+    const reg = String(r[0]).toUpperCase();
+    const team = String(r[3] || '');
+    return {
+      registrationNumber: reg,
+      name: String(r[1]),
+      application: String(r[2]),
+      teamNumber: team,
+      mustChangePin: String(r[6]).toLowerCase() === 'true',
+      active: String(r[7]).toLowerCase() !== 'false',
+      materials: materialsMap[reg] || { count: 0 },
+      quiz: quizMap[reg] || null,
+      presentation: team ? (presentationMap[team] || null) : null,
+      evaluation: resultMap[reg] || null
+    };
+  });
+
+  return {
+    summary: {
+      students: students.length,
+      activeStudents: students.filter(function(s) { return s.active; }).length,
+      materialsSubmitted: students.filter(function(s) { return s.materials && s.materials.count > 0; }).length,
+      quizSubmitted: students.filter(function(s) { return Boolean(s.quiz); }).length,
+      evaluationsPublished: students.filter(function(s) { return s.evaluation && s.evaluation.published; }).length
+    },
+    students: students
+  };
+}
+
+function latestMaterialsSubmission_(spreadsheet, reg) {
+  const sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) return { submitted: false, count: 0 };
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 16).getValues();
+  let count = 0;
+  let latest = null;
+  values.forEach(function(r) {
+    if (String(r[4]).toUpperCase() !== reg) return;
+    count++;
+    latest = {
+      submitted: true,
+      count: count,
+      submittedAt: dateIso_(r[0]),
+      submissionId: String(r[1]),
+      status: String(r[2])
+    };
+  });
+  return latest || { submitted: false, count: 0 };
+}
+
+function latestQuizResult_(spreadsheet, reg) {
+  const sheet = spreadsheet.getSheetByName(QUIZ_RESULTS_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return { submitted: false };
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 11).getValues();
+  let latest = null;
+  values.forEach(function(r) {
+    if (String(r[2]).toUpperCase() !== reg) return;
+    latest = {
+      submitted: true,
+      submittedAt: dateIso_(r[0]),
+      score: Number(r[4]) || 0,
+      total: Number(r[5]) || 0,
+      percentage: Number(r[6]) || 0
+    };
+  });
+  return latest || { submitted: false };
+}
+
+function latestPresentationSubmission_(spreadsheet, team) {
+  if (!team) return { assigned: false, submitted: false };
+  const sheet = spreadsheet.getSheetByName(PRESENTATION_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return { assigned: true, teamNumber: team, submitted: false };
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 15).getValues();
+  let latest = null;
+  values.forEach(function(r) {
+    if (String(r[3]).padStart(2, '0') !== String(team).padStart(2, '0')) return;
+    latest = {
+      assigned: true,
+      submitted: true,
+      teamNumber: String(team).padStart(2, '0'),
+      submittedAt: dateIso_(r[0]),
+      submissionId: String(r[1]),
+      status: String(r[2]),
+      topic: String(r[4])
+    };
+  });
+  return latest || { assigned: true, teamNumber: String(team).padStart(2, '0'), submitted: false };
+}
+
+function secureEvaluation_(spreadsheet, reg) {
+  const sheet = spreadsheet.getSheetByName(STUDENT_RESULTS_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return { available: false };
+  const row = findRowByValue_(sheet, 1, reg);
+  if (!row) return { available: false };
+  const r = sheet.getRange(row, 1, 1, 9).getValues()[0];
+  const published = String(r[8]).toLowerCase() === 'true';
+  if (!published) return { available: true, published: false };
+  let scores = [];
+  try { scores = JSON.parse(String(r[3] || '[]')); } catch (_) {}
+  return {
+    available: true,
+    published: true,
+    application: String(r[2]),
+    scores: scores,
+    writtenTotal: Number(r[4]) || 0,
+    good: String(r[5]),
+    improve: String(r[6]),
+    updatedAt: dateIso_(r[7])
+  };
+}
+
+function materialsSummaryMap_(spreadsheet) {
+  const map = {};
+  const sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) return map;
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 16).getValues();
+  values.forEach(function(r) {
+    const reg = String(r[4]).toUpperCase();
+    if (!reg) return;
+    if (!map[reg]) map[reg] = { count: 0 };
+    map[reg].count++;
+    map[reg].submittedAt = dateIso_(r[0]);
+    map[reg].status = String(r[2]);
+  });
+  return map;
+}
+
+function quizSummaryMap_(spreadsheet) {
+  const map = {};
+  const sheet = spreadsheet.getSheetByName(QUIZ_RESULTS_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return map;
+  sheet.getRange(2, 1, sheet.getLastRow() - 1, 11).getValues().forEach(function(r) {
+    const reg = String(r[2]).toUpperCase();
+    if (!reg) return;
+    map[reg] = {
+      submittedAt: dateIso_(r[0]),
+      score: Number(r[4]) || 0,
+      total: Number(r[5]) || 0,
+      percentage: Number(r[6]) || 0
+    };
+  });
+  return map;
+}
+
+function presentationSummaryMap_(spreadsheet) {
+  const map = {};
+  const sheet = spreadsheet.getSheetByName(PRESENTATION_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return map;
+  sheet.getRange(2, 1, sheet.getLastRow() - 1, 15).getValues().forEach(function(r) {
+    const team = String(r[3]).padStart(2, '0');
+    if (!team) return;
+    map[team] = {
+      submittedAt: dateIso_(r[0]),
+      status: String(r[2]),
+      topic: String(r[4])
+    };
+  });
+  return map;
+}
+
+function resultSummaryMap_(spreadsheet) {
+  const map = {};
+  const sheet = spreadsheet.getSheetByName(STUDENT_RESULTS_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return map;
+  sheet.getRange(2, 1, sheet.getLastRow() - 1, 9).getValues().forEach(function(r) {
+    const reg = String(r[0]).toUpperCase();
+    if (!reg) return;
+    map[reg] = {
+      writtenTotal: Number(r[4]) || 0,
+      published: String(r[8]).toLowerCase() === 'true'
+    };
+  });
+  return map;
+}
+
+function findStudentAccess_(spreadsheet, reg) {
+  const sheet = spreadsheet.getSheetByName(STUDENT_ACCESS_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return null;
+  const row = findRowByValue_(sheet, 1, reg);
+  if (!row) return null;
+  const r = sheet.getRange(row, 1, 1, 10).getValues()[0];
+  return {
+    row: row,
+    reg: String(r[0]).toUpperCase(),
+    name: String(r[1]),
+    application: String(r[2]),
+    team: String(r[3]),
+    pinSalt: String(r[4]),
+    pinHash: String(r[5]),
+    mustChangePin: String(r[6]).toLowerCase() === 'true',
+    active: String(r[7]).toLowerCase() !== 'false'
+  };
+}
+
+function personalisationSpreadsheet_() {
+  const id = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID');
+  if (!id) throw new Error('The faculty setup is incomplete.');
+  const spreadsheet = SpreadsheetApp.openById(id);
+  ensurePersonalisationSheets_(spreadsheet);
+  return spreadsheet;
+}
+
+function createAuthSession_(spreadsheet, role, reg, hours) {
+  cleanupExpiredSessions_(spreadsheet);
+  const token = randomToken_() + randomToken_();
+  const now = new Date();
+  const expires = new Date(now.getTime() + hours * 60 * 60 * 1000);
+  spreadsheet.getSheetByName(AUTH_SESSIONS_SHEET).appendRow([
+    hashSessionToken_(token), role, sheetSafe_(reg || ''), now, expires, now
+  ]);
+  return { token: token, expiresAt: expires.toISOString() };
+}
+
+function validateSession_(spreadsheet, token, role) {
+  cleanupExpiredSessions_(spreadsheet);
+  const sheet = spreadsheet.getSheetByName(AUTH_SESSIONS_SHEET);
+  const hash = hashSessionToken_(token);
+  const row = findRowByValue_(sheet, 1, hash);
+  if (!row) throw new Error('Your session has expired. Please sign in again.');
+  const r = sheet.getRange(row, 1, 1, 6).getValues()[0];
+  const expires = r[4] instanceof Date ? r[4] : new Date(r[4]);
+  if (String(r[1]) !== role || isNaN(expires.getTime()) || expires.getTime() <= Date.now()) {
+    sheet.deleteRow(row);
+    throw new Error('Your session has expired. Please sign in again.');
+  }
+  sheet.getRange(row, 6).setValue(new Date());
+  return { role: String(r[1]), reg: String(r[2]).toUpperCase(), expiresAt: expires.toISOString() };
+}
+
+function cleanupExpiredSessions_(spreadsheet) {
+  const sheet = spreadsheet.getSheetByName(AUTH_SESSIONS_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return;
+  const now = Date.now();
+  const values = sheet.getRange(2, 5, sheet.getLastRow() - 1, 1).getValues();
+  for (let i = values.length - 1; i >= 0; i--) {
+    const date = values[i][0] instanceof Date ? values[i][0] : new Date(values[i][0]);
+    if (isNaN(date.getTime()) || date.getTime() <= now) sheet.deleteRow(i + 2);
+  }
+}
+
+function removeSessionsForRegistration_(spreadsheet, reg) {
+  const sheet = spreadsheet.getSheetByName(AUTH_SESSIONS_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return;
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, 3).getValues();
+  for (let i = values.length - 1; i >= 0; i--) {
+    if (String(values[i][1]) === 'student' && String(values[i][2]).toUpperCase() === reg) {
+      sheet.deleteRow(i + 2);
+    }
+  }
+}
+
+function removeSessionsForRole_(spreadsheet, role) {
+  const sheet = spreadsheet.getSheetByName(AUTH_SESSIONS_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return;
+  const values = sheet.getRange(2, 2, sheet.getLastRow() - 1, 1).getValues();
+  for (let i = values.length - 1; i >= 0; i--) {
+    if (String(values[i][0]) === role) sheet.deleteRow(i + 2);
+  }
+}
+
+function findRowByValue_(sheet, column, value) {
+  if (!sheet || sheet.getLastRow() < 2) return 0;
+  const finder = sheet.getRange(2, column, sheet.getLastRow() - 1, 1)
+    .createTextFinder(String(value)).matchEntireCell(true).matchCase(false).findNext();
+  return finder ? finder.getRow() : 0;
+}
+
+function normaliseRegNo_(value) {
+  const reg = required_(value, 'Registration number', 30).toUpperCase();
+  if (!/^[A-Z0-9._\/-]{3,30}$/.test(reg)) throw new Error('Registration number format is invalid.');
+  return reg;
+}
+
+function validateNewPin_(value) {
+  const pin = String(value || '');
+  if (pin.length < 6 || pin.length > 32 || /\s/.test(pin)) {
+    throw new Error('PIN must contain 6–32 characters with no spaces.');
+  }
+  return pin;
+}
+
+function generateStudentPin_() {
+  return Utilities.getUuid().replace(/-/g, '').slice(0, 8).toUpperCase();
+}
+
+function generateFacultyPassword_() {
+  return Utilities.getUuid().replace(/-/g, '').slice(0, 16) + '!';
+}
+
+function setFacultyPassword_(password) {
+  const props = PropertiesService.getScriptProperties();
+  const salt = randomToken_().slice(0, 32);
+  props.setProperty('FACULTY_PASSWORD_SALT', salt);
+  props.setProperty('FACULTY_PASSWORD_HASH', hashSecret_(password, salt));
+}
+
+function hashSecret_(secret, salt) {
+  const props = PropertiesService.getScriptProperties();
+  const pepper = props.getProperty('AUTH_PEPPER') || '';
+  return digestHex_(String(secret) + '|' + String(salt) + '|' + pepper);
+}
+
+function hashSessionToken_(token) {
+  const pepper = PropertiesService.getScriptProperties().getProperty('AUTH_PEPPER') || '';
+  return digestHex_('session|' + String(token) + '|' + pepper);
+}
+
+function digestHex_(text) {
+  const bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, text, Utilities.Charset.UTF_8);
+  return bytes.map(function(b) {
+    const value = b < 0 ? b + 256 : b;
+    return ('0' + value.toString(16)).slice(-2);
+  }).join('');
+}
+
+function randomToken_() {
+  return Utilities.getUuid().replace(/-/g, '');
+}
+
+function rateLimitKey_(key) {
+  return 'AUTH_FAIL_' + digestHex_(String(key)).slice(0, 24);
+}
+
+function rateLimitCheck_(key) {
+  const value = Number(CacheService.getScriptCache().get(rateLimitKey_(key)) || 0);
+  if (value >= 5) throw new Error('Too many failed sign-in attempts. Please wait 10 minutes and try again.');
+}
+
+function rateLimitFail_(key) {
+  const cache = CacheService.getScriptCache();
+  const name = rateLimitKey_(key);
+  const value = Number(cache.get(name) || 0) + 1;
+  cache.put(name, String(value), 600);
+}
+
+function rateLimitClear_(key) {
+  CacheService.getScriptCache().remove(rateLimitKey_(key));
+}
+
 function saveSubmission_(p) {
   const props = PropertiesService.getScriptProperties();
   const spreadsheetId = props.getProperty('SPREADSHEET_ID');
@@ -526,16 +1263,14 @@ function safeErrorMessage_(error) {
 }
 
 function responsePage_(result) {
-  const json = JSON.stringify({
-    type: result.responseType || 'materials-submission-result',
-    ok: Boolean(result.ok),
-    message: result.message || '',
-    submissionId: result.submissionId || '',
-    registrationNumber: result.registrationNumber || '',
-    teamNumber: result.teamNumber || '',
-    topicTitle: result.topicTitle || '',
-    submittedAt: result.submittedAt || ''
-  }).replace(/</g, '\\u003c');
+  const response = {};
+  Object.keys(result || {}).forEach(function(key) {
+    if (key !== 'responseType') response[key] = result[key];
+  });
+  response.type = result && result.responseType ? result.responseType : 'materials-submission-result';
+  response.ok = Boolean(result && result.ok);
+  response.message = result && result.message ? String(result.message) : '';
+  const json = JSON.stringify(response).replace(/</g, '\\u003c');
   const html = '<!doctype html><html><body><script>' +
     'window.parent.postMessage(' + json + ', "*");' +
     '<\/script></body></html>';
