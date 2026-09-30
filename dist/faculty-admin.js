@@ -160,6 +160,7 @@
     if(student)openEditor(student);
   });
   document.getElementById("studentSearch").addEventListener("input",renderTable);
+  document.getElementById("marksSearch").addEventListener("input",filterMarksRows);
 
   function openEditor(student){
     selectedReg=student.registrationNumber;
@@ -176,6 +177,37 @@
     toggle.textContent=student.evaluation&&student.evaluation.published?"Unpublish evaluation":"Publish evaluation";
     editor.scrollIntoView({behavior:"smooth",block:"start"});
   }
+
+  document.getElementById("saveAssessmentMarks").addEventListener("click",async function(){
+    const error=document.getElementById("marksError");
+    clearError(error);
+    document.getElementById("marksMessage").hidden=true;
+    const button=this;
+    button.disabled=true;
+    try{
+      const records=Array.from(document.querySelectorAll("#marksTableBody tr")).map(function(row){
+        const inputs=row.querySelectorAll(".mark-input");
+        const student=students.find(function(s){return s.registrationNumber===row.dataset.reg;});
+        const label=student?student.name:row.dataset.reg;
+        return {
+          registrationNumber:row.dataset.reg,
+          at1:validateMark(inputs[0].value,"AT-1 for "+label),
+          at2:validateMark(inputs[1].value,"AT-2 for "+label),
+          model:validateMark(inputs[2].value,"Model Test for "+label)
+        };
+      });
+      const response=await auth.request("facultySaveAssessmentMarks",{
+        token:token,
+        marksJson:JSON.stringify(records)
+      });
+      showMarksMessage((response.saved||records.length)+" student assessment records saved.");
+      await refreshWithoutViewReset();
+    }catch(e){
+      showError(error,e.message);
+    }finally{
+      button.disabled=false;
+    }
+  });
 
   document.getElementById("newStudent").addEventListener("click",function(){
     selectedReg="";editor.hidden=false;clearError(editorError);document.getElementById("pinOutput").hidden=true;
