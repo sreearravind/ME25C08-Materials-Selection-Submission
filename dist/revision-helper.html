@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ME25C08 revision helper and assessment-test preparation">
+  <meta name="theme-color" content="#10263f">
+  <title>Revision Helper | NE25C08 Course Hub</title>
+  <link rel="stylesheet" href="revision.css">
+  <script src="config.js"></script>
+  <script src="revision-data.js"></script>
+  <script src="revision-helper.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">RH</div>
+    <div class="brand-copy">
+      <p class="eyebrow" id="courseCode">ME25C08</p>
+      <h1>Revision Helper</h1>
+      <p>AT preparation · topic tracking · self-study planning</p>
+    </div>
+    <nav class="top-actions">
+      <a href="index.html">Course Hub</a>
+      <a href="unit-materials.html">Unit Materials</a>
+      <a href="question-bank.html">Question Bank</a>
+      <a href="practice-mcq.html">Practice MCQs</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="hero">
+      <div>
+        <p class="kicker">PHASE 3 · STUDENT LEARNING SUPPORT</p>
+        <h2>Plan what to revise, track what you finish, then practise.</h2>
+        <p>This helper follows the course handout sequence: AT1 covers Units I–II, AT2 covers Units III–IV, AT3 follows Unit V, and the Model Examination is treated as cumulative revision across Units I–V.</p>
+      </div>
+      <a class="primary-action" href="practice-mcq.html">Start practice MCQs →</a>
+    </section>
+
+    <div class="notice info-notice">
+      <strong>Private to your browser:</strong> checklist progress is stored only in this browser using local storage. It is not submitted to the faculty and does not affect internal marks.
+    </div>
+
+    <section class="section">
+      <div class="section-heading">
+        <p class="kicker">ASSESSMENT PATHWAYS</p>
+        <h2>Choose the revision scope</h2>
+        <p>The unit groupings follow the order of the detailed academic calendar in the course handout.</p>
+      </div>
+      <div id="assessmentCards" class="assessment-grid"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <p class="kicker">QUICK STUDY PLANNER</p>
+        <h2>Build a revision session from the time you have</h2>
+        <p>The planner divides your available time across the units in the selected assessment and suggests a simple learn–recall–practice split.</p>
+      </div>
+
+      <div class="planner-grid">
+        <div class="panel">
+          <div class="form-grid">
+            <label>Assessment
+              <select id="assessmentSelect">
+                <option value="AT1">Assessment Test 1</option>
+                <option value="AT2">Assessment Test 2</option>
+                <option value="AT3">Assessment Test 3</option>
+                <option value="MODEL">Model Examination</option>
+              </select>
+            </label>
+            <label>Available study time
+              <select id="timeSelect">
+                <option value="30">30 minutes</option>
+                <option value="60" selected>60 minutes</option>
+                <option value="90">90 minutes</option>
+                <option value="120">2 hours</option>
+                <option value="180">3 hours</option>
+              </select>
+            </label>
+          </div>
+          <div class="button-row">
+            <button type="button" id="buildPlan">Build revision plan</button>
+            <button type="button" class="secondary" id="resetProgress">Reset checklist for this assessment</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div id="planOutput" class="plan-output"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <p class="kicker">TOPIC CHECKLIST</p>
+        <h2 id="checklistTitle">Assessment Test 1 revision checklist</h2>
+        <p>Tick a topic only when you can explain it without relying entirely on the notes.</p>
+      </div>
+
+      <div class="progress-card">
+        <div class="progress-head">
+          <strong id="progressLabel">0% completed</strong>
+          <span class="progress-meta" id="progressMeta">0 / 18 topics</span>
+        </div>
+        <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+
+      <div id="topicChecklist" class="checklist"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <p class="kicker">NEXT STEP</p>
+        <h2>Move from revision to retrieval practice</h2>
+      </div>
+      <div class="study-actions">
+        <a class="study-card" href="practice-mcq.html">
+          <p class="mini">SELF-STUDY</p>
+          <h3>Practice MCQs</h3>
+          <p>Choose an AT, a unit or the Model Exam scope and get instant explanations after each answer.</p>
+          <span>Start practice →</span>
+        </a>
+        <a class="study-card" href="question-bank.html">
+          <p class="mini">QUESTION BANK</p>
+          <h3>AT2 Question Bank</h3>
+          <p>The currently uploaded Units III–IV Question Bank and AT2 Q&A remains available as the formal revision resource for those units.</p>
+          <span>Open Question Bank →</span>
+        </a>
+        <a class="study-card" href="unit-materials.html">
+          <p class="mini">COURSE MATERIALS</p>
+          <h3>Return to Unit Notes</h3>
+          <p>Use the checklist to identify weak topics and return directly to the corresponding Unit I–IV resource page.</p>
+          <span>Browse unit materials →</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span id="institutionName">Department of Mechanical Engineering</span>
+    <span>ME25C08 · Revision Helper</span>
+  </footer>
+</body>
+</html>
