@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ME25C08 authenticated faculty administration">
+  <meta name="theme-color" content="#10263f">
+  <title>Faculty Administration | NE25C08 Course Hub</title>
+  <link rel="stylesheet" href="auth.css">
+  <script src="config.js"></script>
+  <script src="auth-client.js"></script>
+  <script src="faculty-admin.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark">FA</div>
+    <div class="brand-copy">
+      <p class="eyebrow" id="courseCode">ME25C08</p>
+      <h1>Faculty Administration</h1>
+      <p>Authenticated roster, access and publication control</p>
+    </div>
+    <nav class="top-actions">
+      <a href="index.html">Course Hub</a>
+      <a href="student-access.html">Student Dashboard</a>
+      <button type="button" id="logoutTop" hidden>Sign out</button>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section id="loginView" class="auth-shell">
+      <div class="auth-card">
+        <p class="kicker">FACULTY-ONLY ACCESS</p>
+        <h2>Sign in to administer ME25C08</h2>
+        <p class="privacy-note">The faculty password is generated/set in Google Apps Script and stored only as a salted server-side hash. It is not stored in the GitHub repository.</p>
+        <form id="loginForm">
+          <label>Faculty password
+            <input id="facultyPassword" type="password" required maxlength="128" autocomplete="current-password">
+          </label>
+          <div id="loginError" class="notice error" hidden></div>
+          <div class="button-row">
+            <button type="submit" id="loginButton">Sign in</button>
+            <a class="button-link secondary" href="index.html">Back to Course Hub</a>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section id="loadingView" class="auth-shell" hidden>
+      <div class="auth-card loading"><span class="spinner"></span><span>Loading faculty administration…</span></div>
+    </section>
+
+    <section id="dashboardView" hidden>
+      <div class="dashboard-head">
+        <div>
+          <p class="kicker">AUTHENTICATED FACULTY</p>
+          <h2>ME25C08 administration</h2>
+          <p>Manage student access without placing PINs or faculty credentials in the repository.</p>
+        </div>
+        <div class="button-row">
+          <button type="button" class="secondary" id="refreshDashboard">Refresh</button>
+          <button type="button" id="logoutButton">Sign out</button>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <article class="status-card"><p class="mini">STUDENTS</p><strong class="big" id="sumStudents">0</strong><p>Total access records</p></article>
+        <article class="status-card"><p class="mini">ACTIVE</p><strong class="big" id="sumActive">0</strong><p>Enabled student accounts</p></article>
+        <article class="status-card"><p class="mini">MATERIALS</p><strong class="big" id="sumMaterials">0</strong><p>Students with a submission</p></article>
+        <article class="status-card"><p class="mini">FORMAL MCQ</p><strong class="big" id="sumQuiz">0</strong><p>Students with a result</p></article>
+        <article class="status-card"><p class="mini">EVALUATIONS</p><strong class="big" id="sumResults">0</strong><p>Published secure evaluations</p></article>
+      </div>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="kicker">STUDENT ACCESS DIRECTORY</p>
+          <h2>Roster and course status</h2>
+          <p>Editing team numbers here personalises the Student Dashboard. The public Presentation page remains a separate submission interface.</p>
+        </div>
+
+        <div class="admin-tools">
+          <label>Search
+            <input id="studentSearch" type="search" placeholder="Name or registration number">
+          </label>
+          <button type="button" id="newStudent">Add student</button>
+        </div>
+
+        <div id="adminMessage" class="notice success" hidden></div>
+
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Student</th><th>Team</th><th>Access</th><th>Materials</th><th>MCQ</th><th>Presentation</th><th>Evaluation</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody"></tbody>
+          </table>
+        </div>
+
+        <section id="studentEditor" class="student-editor" hidden>
+          <p class="mini">STUDENT RECORD</p>
+          <h3 id="editorTitle">Edit student</h3>
+          <form id="studentForm">
+            <div class="editor-grid">
+              <label>Registration number
+                <input id="editReg" maxlength="30" required>
+              </label>
+              <label>Student name
+                <input id="editName" maxlength="100" required>
+              </label>
+              <label>Presentation team
+                <select id="editTeam">
+                  <option value="">Not assigned</option>
+                  <option value="01">Team 01</option><option value="02">Team 02</option>
+                  <option value="03">Team 03</option><option value="04">Team 04</option>
+                  <option value="05">Team 05</option><option value="06">Team 06</option>
+                  <option value="07">Team 07</option><option value="08">Team 08</option>
+                  <option value="09">Team 09</option><option value="10">Team 10</option>
+                  <option value="11">Team 11</option>
+                </select>
+              </label>
+              <label class="check-row">Account active
+                <input id="editActive" type="checkbox">
+              </label>
+            </div>
+            <label>Assigned Materials Selection application
+              <textarea id="editApplication" rows="3" maxlength="300"></textarea>
+            </label>
+            <div class="button-row">
+              <button type="submit">Save student</button>
+              <button type="button" class="secondary" id="resetPinButton">Reset PIN</button>
+              <button type="button" class="secondary" id="toggleResultButton">Publish evaluation</button>
+              <button type="button" class="secondary" id="closeEditor">Close</button>
+            </div>
+          </form>
+          <div id="editorError" class="notice error" hidden></div>
+          <div id="pinOutput" class="pin-output" hidden>
+            <strong>Temporary PIN — copy and give it to this student once:</strong><br>
+            <code id="pinValue"></code>
+            <p class="privacy-note">The student will be asked to change this PIN after signing in. This plaintext PIN is not retrievable later.</p>
+          </div>
+        </section>
+      </section>
+
+      <section class="section">
+        <div class="panel password-panel">
+          <p class="mini">FACULTY SECURITY</p>
+          <h2>Change faculty password</h2>
+          <p class="privacy-note">Changing the faculty password signs out all current faculty sessions. Use at least 10 characters.</p>
+          <form id="passwordForm">
+            <div class="form-grid">
+              <label>New password
+                <input id="newFacultyPassword" type="password" minlength="10" maxlength="128" required autocomplete="new-password">
+              </label>
+              <label>Confirm password
+                <input id="confirmFacultyPassword" type="password" minlength="10" maxlength="128" required autocomplete="new-password">
+              </label>
+            </div>
+            <div id="passwordError" class="notice error" hidden></div>
+            <button type="submit">Change faculty password</button>
+          </form>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer>
+    <span id="institutionName">Department of Mechanical Engineering</span>
+    <span>ME25C08 · Faculty Administration</span>
+  </footer>
+</body>
+</html>
