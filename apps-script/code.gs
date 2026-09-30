@@ -70,13 +70,43 @@ function setupProject() {
 function doGet(e) {
   const p = e && e.parameter ? e.parameter : {};
   if (p.action === 'quizMonitor') return quizMonitorResponse_(p);
+  if (p.action === 'authHealth') return authHealthResponse_();
   return HtmlService.createHtmlOutput('Materials Selection submission and quiz service is active.');
+}
+
+function authHealthResponse_() {
+  const props = PropertiesService.getScriptProperties();
+  const spreadsheetId = props.getProperty('SPREADSHEET_ID');
+  let sheetsReady = false;
+  try {
+    if (spreadsheetId) {
+      const ss = SpreadsheetApp.openById(spreadsheetId);
+      sheetsReady = Boolean(
+        ss.getSheetByName(STUDENT_ACCESS_SHEET) &&
+        ss.getSheetByName(AUTH_SESSIONS_SHEET) &&
+        ss.getSheetByName(STUDENT_RESULTS_SHEET)
+      );
+    }
+  } catch (_) {}
+  const payload = {
+    service: 'ME25C08 Phase 4 authentication',
+    phase4: true,
+    facultyPasswordConfigured: Boolean(
+      props.getProperty('FACULTY_PASSWORD_HASH') &&
+      props.getProperty('FACULTY_PASSWORD_SALT')
+    ),
+    authPepperConfigured: Boolean(props.getProperty('AUTH_PEPPER')),
+    personalisationSheetsReady: sheetsReady
+  };
+  return ContentService.createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
   let result;
   const p = e && e.parameter ? e.parameter : {};
   const action = String(p.action || '');
+  console.log('doPost action: ' + action);
   try {
     if (action === 'quizEvent') {
       saveQuizEvent_(p);
