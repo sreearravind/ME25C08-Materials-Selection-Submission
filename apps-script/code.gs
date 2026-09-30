@@ -23,6 +23,7 @@ const STUDENT_ACCESS_SHEET = 'Student Access';
 const AUTH_SESSIONS_SHEET = 'Auth Sessions';
 const STUDENT_RESULTS_SHEET = 'Student Results';
 const INITIAL_PINS_SHEET = 'Initial Student PINs';
+const INTERNAL_MARKS_SHEET = 'Internal Assessment Marks';
 const STUDENT_SESSION_HOURS = 8;
 const FACULTY_SESSION_HOURS = 2;
 const LEGACY_PERSONALISATION_COMMIT = 'e32fa1ede81527b13c40bc0f9d48adb351b97360';
@@ -136,6 +137,8 @@ function doPost(e) {
       result = facultyToggleResult_(p);
     } else if (action === 'facultyChangePassword') {
       result = facultyChangePassword_(p);
+    } else if (action === 'facultySaveAssessmentMarks') {
+      result = facultySaveAssessmentMarks_(p);
     } else {
       result = saveSubmission_(p);
     }
@@ -560,6 +563,9 @@ function ensurePersonalisationSheets_(spreadsheet) {
   ensureSheet_(spreadsheet, INITIAL_PINS_SHEET, [
     'Registration number', 'Student name', 'Temporary PIN', 'Generated'
   ]);
+  ensureSheet_(spreadsheet, INTERNAL_MARKS_SHEET, [
+    'Registration number', 'Student name', 'AT-1', 'AT-2', 'Model Test', 'Updated'
+  ]);
 }
 
 function bootstrapStudentRoster_(spreadsheet) {
@@ -847,6 +853,77 @@ function buildStudentDashboard_(spreadsheet, student) {
   return result;
 }
 
+function facultySaveAssessmentMarks_(p) {
+  const spreadsheet = personalisationSpreadsheet_();
+  validateSession_(spreadsheet, required_(p.token, 'Session token', 200), 'faculty');
+
+  let records;
+  try {
+    records = JSON.parse(String(p.marksJson || '[]'));
+  } catch (_) {
+    throw new Error('Assessment marks payload is invalid.');
+  }
+  if (!Array.isArray(records) || records.length > 100) {
+    throw new Error('Assessment marks payload is invalid.');
+  }
+
+  const access = spreadsheet.getSheetByName(STUDENT_ACCESS_SHEET);
+  const marksSheet = ensureSheet_(spreadsheet, INTERNAL_MARKS_SHEET, [
+    'Registration number', 'Student name', 'AT-1', 'AT-2', 'Model Test', 'Updated'
+  ]);
+  const now = new Date();
+
+  records.forEach(function(item) {
+    const reg = normaliseRegNo_(item.registrationNumber);
+    const accessRow = findRowByValue_(access, 1, reg);
+    if (!accessRow) throw new Error('Student access record was not found for ' + reg + '.');
+    const name = String(access.getRange(accessRow, 2).getDisplayValue() || '').trim();
+
+    const at1 = normaliseAssessmentMark_(item.at1, 'AT-1');
+    const at2 = normaliseAssessmentMark_(item.at2, 'AT-2');
+    const model = normaliseAssessmentMark_(item.model, 'Model Test');
+
+    let row = findRowByValue_(marksSheet, 1, reg);
+    const values = [[sheetSafe_(reg), sheetSafe_(name), at1, at2, model, now]];
+    if (row) marksSheet.getRange(row, 1, 1, 6).setValues(values);
+    else marksSheet.getRange(marksSheet.getLastRow() + 1, 1, 1, 6).setValues(values);
+  });
+
+  return {
+    responseType: 'facultySaveAssessmentMarks-result',
+    ok: true,
+    saved: records.length
+  };
+}
+
+function normaliseAssessmentMark_(value, label) {
+  const text = String(value == null ? '' : value).trim();
+  if (!text) return '';
+  if (/^(abs|a)$/i.test(text)) return 'Abs';
+  const number = Number(text);
+  if (!isFinite(number) || number < 0 || number > 100) {
+    throw new Error(label + ' must be blank, "Abs", or a mark from 0 to 100.');
+  }
+  return Math.round(number * 100) / 100;
+}
+
+function assessmentMarksMap_(spreadsheet) {
+  const map = {};
+  const sheet = spreadsheet.getSheetByName(INTERNAL_MARKS_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return map;
+  sheet.getRange(2, 1, sheet.getLastRow() - 1, 6).getValues().forEach(function(r) {
+    const reg = String(r[0] || '').toUpperCase();
+    if (!reg) return;
+    map[reg] = {
+      at1: r[2] === '' ? '' : String(r[2]),
+      at2: r[3] === '' ? '' : String(r[3]),
+      model: r[4] === '' ? '' : String(r[4]),
+      updatedAt: r[5] ? dateIso_(r[5]) : ''
+    };
+  });
+  return map;
+}
+
 function buildFacultyDashboard_(spreadsheet) {
   const access = spreadsheet.getSheetByName(STUDENT_ACCESS_SHEET);
   const rows = access.getLastRow() > 1
@@ -855,6 +932,7 @@ function buildFacultyDashboard_(spreadsheet) {
   const quizMap = quizSummaryMap_(spreadsheet);
   const presentationMap = presentationSummaryMap_(spreadsheet);
   const resultMap = resultSummaryMap_(spreadsheet);
+  const marksMap = assessmentMarksMap_(spreadsheet);
 
   const students = rows.map(function(r) {
     const reg = String(r[0]).toUpperCase();
@@ -869,7 +947,8 @@ function buildFacultyDashboard_(spreadsheet) {
       materials: materialsMap[reg] || { count: 0 },
       quiz: quizMap[reg] || null,
       presentation: team ? (presentationMap[team] || null) : null,
-      evaluation: resultMap[reg] || null
+      evaluation: resultMap[reg] || null,
+      assessmentMarks: marksMap[reg] || { at1: '', at2: '', model: '', updatedAt: '' }
     };
   });
 
