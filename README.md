@@ -135,6 +135,12 @@ The course hub is intended to provide the digital layer for these course activit
 - **AI-Assisted Materials Selection** – individual report submission with AI-use, verification and reflection record
 - **Student Technical Presentation** – 11 presentation topics with team allocation and team file submission
 
+### Individual mini-project exploration
+- **Mini-Project Explorer** — `dist/mini-project-explorer.html`: 12-question, non-graded self-reflection activity that identifies three possible Mechanical Engineering interest fields, explains the matches and offers resource-aware starter directions. The quiz is implemented entirely in the browser (no student identity, answer storage, network submission or grading).
+- **Common academic resource directory** — the same six externally hosted educational links appear on the Explorer page for every student: NDLI, NPTEL, Virtual Labs, National Innovation Foundation, SWAYAM and Shodhganga.
+- **Summary export** — students can copy their summary or print/save it as a PDF to bring to a mentor discussion. Results are not uploaded automatically.
+- **Mentoring requirement** — recommendations are exploratory, not final titles; availability of a laboratory/workshop and originality must be confirmed by the mentor and department.
+
 ### Student learning support
 - **Revision Helper** – AT1 / AT2 / AT3 / Model Exam preparation paths, timed study planning and browser-local topic completion tracking
 - **Practice MCQs** – separate self-study question bank with shuffled answer order, instant explanations and no backend submission
