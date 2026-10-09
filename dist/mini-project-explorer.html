@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore Mechanical Engineering mini-project fields through an interest-discovery questionnaire and common academic resources.">
+  <meta name="theme-color" content="#10263f">
+  <title>Mini-Project Explorer | NE25C08 Course Hub</title>
+  <link rel="stylesheet" href="mini-project-explorer.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-mark" aria-hidden="true">M</div>
+    <div class="brand-copy">
+      <p class="eyebrow">MECHANICAL ENGINEERING · STUDENT EXPLORATION</p>
+      <h1>Mini-Project Explorer</h1>
+      <p>Discover an area of interest before finalising your individual mini-project.</p>
+    </div>
+    <nav class="top-actions" aria-label="Navigation">
+      <a href="index.html">← Course Hub</a>
+      <a href="#resources">Common research resources</a>
+    </nav>
+  </header>
+  <main class="page-shell">
+    <section class="hero" aria-labelledby="introTitle">
+      <span class="kicker">DISCOVER · EXPLORE · DISCUSS</span>
+      <h2 id="introTitle">Find a project direction that interests you.</h2>
+      <p>Answer a short series of questions. You will receive a personal, indicative summary of three possible Mechanical Engineering fields, starter project ideas and next steps. There are no right or wrong answers, and this is <strong>not an examination</strong>.</p>
+      <div class="feature-row"><span>About 5–7 minutes</span><span>12 questions</span><span>No account or student details required</span></div>
+    </section>
+
+    <section class="quiz-panel" id="explorer" aria-labelledby="quizTitle">
+      <div class="panel-heading">
+        <div><p class="kicker">INTEREST DISCOVERY</p><h2 id="quizTitle">Your preferences</h2></div>
+        <strong class="counter" id="counter">Question 1 of 12</strong>
+      </div>
+      <div class="progress-rail" role="progressbar" aria-label="Question progress" aria-valuemin="0" aria-valuemax="12" aria-valuenow="1" id="progress"><div id="progressFill"></div></div>
+      <form id="interestForm" novalidate>
+        <fieldset class="question" id="questionGroup" aria-describedby="questionHint">
+          <legend id="questionText">Loading question…</legend>
+          <p class="hint" id="questionHint"></p>
+          <div class="choices" id="choices"></div>
+        </fieldset>
+        <p class="error" role="alert" id="questionError" hidden>Please choose one option to continue.</p>
+        <div class="quiz-actions">
+          <button class="button secondary" type="button" id="previousButton">← Previous</button>
+          <button class="button primary" type="button" id="nextButton">Next question →</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="result" class="results" hidden tabindex="-1" aria-live="polite">
+      <div class="result-header">
+        <p class="kicker">PERSONAL EXPLORATION SUMMARY</p>
+        <h2>Possible fields for your mini-project</h2>
+        <p id="resultIntro"></p>
+      </div>
+      <div id="resultCards" class="result-cards"></div>
+      <section class="next-steps">
+        <h3>Your next steps</h3>
+        <ol>
+          <li>Choose one or two of the suggested fields that genuinely interest you.</li>
+          <li>Explore the <a href="#resources">common academic resources</a> below. Note at least two useful non-AI sources and what you learned.</li>
+          <li>Define one specific, achievable engineering problem, intended output and method.</li>
+          <li>Discuss scope, facilities, cost and originality with your mentor before finalising a title.</li>
+          <li>Use AI for explanations or planning when helpful, but check claims and keep a record of sources.</li>
+        </ol>
+        <p class="caution"><strong>Important:</strong> This is a preference-based suggestion, not an aptitude test, project approval or assessment grade. The final topic must be agreed with your mentor and follow departmental requirements.</p>
+        <div class="result-actions">
+          <button class="button primary" id="copyButton" type="button">Copy my summary</button>
+          <button class="button secondary" id="printButton" type="button">Print / Save as PDF</button>
+          <button class="button text-button" id="restartButton" type="button">Start again</button>
+        </div>
+        <p id="copyStatus" class="status-text" role="status" aria-live="polite"></p>
+      </section>
+    </section>
+
+    <section id="resources" class="resources" aria-labelledby="resourceTitle">
+      <div class="section-heading">
+        <p class="kicker">SHARED BY ALL STUDENTS</p>
+        <h2 id="resourceTitle">Research and learning resources</h2>
+        <p>Everyone receives the same links, regardless of their questionnaire answers. Begin with accessible educational material; use thesis repositories for ideas and methodology, not for copying project work.</p>
+      </div>
+      <div class="resources-grid">
+        <a href="https://ndl.iitkgp.ac.in/" class="resource-card" target="_blank" rel="noopener noreferrer"><span class="resource-type">FIND LEARNING MATERIAL</span><h3>National Digital Library of India</h3><p>Search for introductory material and books related to your engineering problem.</p><span class="visit">Open NDLI ↗</span></a>
+        <a href="https://nptel.ac.in/courses" class="resource-card" target="_blank" rel="noopener noreferrer"><span class="resource-type">LEARN THE BASICS</span><h3>NPTEL</h3><p>Explore IIT and IISc lectures on design, materials, manufacturing, energy and more.</p><span class="visit">Browse courses ↗</span></a>
+        <a href="https://www.vlab.co.in/" class="resource-card" target="_blank" rel="noopener noreferrer"><span class="resource-type">TRY VIRTUAL EXPERIMENTS</span><h3>Virtual Labs</h3><p>See laboratory experiments, procedures and demonstrations where available.</p><span class="visit">Explore virtual labs ↗</span></a>
+        <a href="https://nif.org.in/" class="resource-card" target="_blank" rel="noopener noreferrer"><span class="resource-type">OBSERVE REAL PROBLEMS</span><h3>National Innovation Foundation</h3><p>Explore grassroots innovations and how practical challenges inspire engineering solutions.</p><span class="visit">Explore innovations ↗</span></a>
+        <a href="https://swayam.gov.in/" class="resource-card" target="_blank" rel="noopener noreferrer"><span class="resource-type">BUILD FOUNDATION KNOWLEDGE</span><h3>SWAYAM</h3><p>Find accessible courses and introductory learning pathways in engineering and design.</p><span class="visit">Explore SWAYAM ↗</span></a>
+        <a href="https://shodhganga.inflibnet.ac.in/" class="resource-card" target="_blank" rel="noopener noreferrer"><span class="resource-type">WITH MENTOR GUIDANCE</span><h3>Shodhganga</h3><p>Read thesis abstracts and problem statements. Start with the abstract and methodology, not the entire thesis.</p><span class="visit">Search theses ↗</span></a>
+      </div>
+      <aside class="search-guide">
+        <h3>Search for a problem, not just a project title.</h3>
+        <p>Try <em>“corrosion of mild steel in saltwater,” “low-cost solar drying of agricultural products,”</em> or <em>“manual plastic bottle crusher mechanism”</em> instead of only “Mechanical Engineering mini-project ideas.” Note the page title, author or institution, link, and date you accessed it.</p>
+      </aside>
+    </section>
+  </main>
+  <footer><span>Department of Mechanical Engineering · ME25C08 Course Hub</span><span>Personal results are generated in this browser only; they are not submitted or stored by this page.</span></footer>
+  <script defer src="mini-project-explorer.js"></script>
+</body>
+</html>
