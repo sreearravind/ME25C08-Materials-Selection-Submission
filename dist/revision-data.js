@@ -67,7 +67,7 @@ window.REVISION_DATA = {
     V: {
       title: "Mechanical Properties and Deformation Mechanisms",
       co: "CO5",
-      material: "",
+      material: "unit-v.html",
       topics: [
         "Mechanisms of plastic deformation: slip",
         "Twinning and comparison with slip",
@@ -96,12 +96,12 @@ window.REVISION_DATA = {
     AT3: {
       title: "Assessment Test 3",
       units: ["V"],
-      note: "Revise Unit V. The handout schedules AT3 after Unit V; the Unit V student-notes PDF is not yet available in the repository."
+      note: "Revise Unit V using the student-notes PDF. The handout schedules AT3 after Unit V."
     },
     MODEL: {
       title: "Model Examination",
       units: ["I", "II", "III", "IV", "V"],
-      note: "Use all five units for cumulative revision. Unit V preparation is currently handout-based until its student material is uploaded."
+      note: "Use the student notes and practice questions for all five units for cumulative revision."
     }
   },
 
